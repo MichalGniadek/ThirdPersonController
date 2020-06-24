@@ -133,7 +133,6 @@ GameObject:
   - component: {fileID: 71064271}
   - component: {fileID: 71064272}
   - component: {fileID: 71064273}
-  - component: {fileID: 71064274}
   - component: {fileID: 71064270}
   m_Layer: 0
   m_Name: Third Person Character
@@ -185,11 +184,28 @@ MonoBehaviour:
     movement: {fileID: 71064270}
     walkForce: 70
     sprintForce: 150
-    stopForce: 0
     maxSpeed: 25
     rotationSpeed: 65
-  inputDirection: {x: 0, y: 0, z: 0}
-  mouse: {x: 0, y: 0}
+    jumpForce: 3000
+  inAirState:
+    stateEvents:
+      enter:
+        m_PersistentCalls:
+          m_Calls: []
+      exit:
+        m_PersistentCalls:
+          m_Calls: []
+    movement: {fileID: 0}
+    additionalGravity: 50
+    moveForce: 120
+    maxSpeed: 25
+    rotationSpeed: 65
+  inputWorldDirection: {x: 0, y: 0, z: 0}
+  isSprinting: 0
+  isJumping: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!54 &71064271
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -239,19 +255,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &71064274
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71064268}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3b347f7b925b504081b5b53feae560b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  movement: {fileID: 71064270}
 --- !u!1 &89401498
 GameObject:
   m_ObjectHideFlags: 3
@@ -2688,7 +2691,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh14470
+  m_Name: pb_Mesh14466
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

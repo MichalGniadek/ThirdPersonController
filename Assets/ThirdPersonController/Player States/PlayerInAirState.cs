@@ -3,42 +3,34 @@
 namespace ThirdPersonController
 {
     [System.Serializable]
-    public class PlayerWalkingState : PlayerState
+    public class PlayerInAirState : PlayerState
     {
-        [SerializeField] float walkForce = 0f;
-        [SerializeField] float sprintForce = 0f;
+        [SerializeField] public float additionalGravity = 0f;
+        [SerializeField] float moveForce = 0f;
         [SerializeField] float maxSpeed = 0f;
         [SerializeField] float rotationSpeed = 0f;
-        [SerializeField] float jumpForce = 0f;
-
-        bool isSprinting = false;
 
         public override PlayerState Process(Vector3 inputWorldDirection)
         {
-            isSprinting = Input.GetKey(KeyCode.LeftShift);
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                movement.rb.AddForce(Vector3.up * jumpForce);
-                return movement.inAirState;
-            }
+            if (movement.OnGround()) return movement.walkingState;
 
             movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
                 CurrentVelocity.Horizontal().magnitude / maxSpeed));
+
+            movement.animator.SetBool("Landing", movement.Landing());
 
             return this;
         }
 
         public override void FixedProcess(Vector3 inputWorldDirection)
         {
-            movement.rb.AddForce(Vector3.down);
+            movement.rb.AddForce(Vector3.down * additionalGravity);
 
             if (inputWorldDirection.sqrMagnitude > 0.05f &&
                 CurrentVelocity.Horizontal().magnitude < maxSpeed)
             {
                 // Movement
-                movement.rb.AddForce(inputWorldDirection.normalized *
-                    (isSprinting ? sprintForce : walkForce));
+                movement.rb.AddForce(inputWorldDirection.normalized * moveForce);
 
                 // Rotation
                 float targetAngle = Mathf.Rad2Deg *
@@ -57,12 +49,13 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
-
+            movement.animator.SetBool("InAir", true);
         }
 
         protected override void ExitImpl()
         {
+            Debug.Log("exit");
+            movement.animator.SetBool("InAir", false);
         }
     }
-
 }
