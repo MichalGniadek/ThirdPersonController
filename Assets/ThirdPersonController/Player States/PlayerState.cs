@@ -12,7 +12,8 @@ namespace ThirdPersonController
             public UnityEvent enter;
             public UnityEvent exit;
         }
-        [SerializeField] StateEvents stateEvents = new StateEvents();
+        /*[SerializeField]*/
+        StateEvents stateEvents = new StateEvents();
 
         [HideInInspector] public ThirdPersonMovement movement = null;
 

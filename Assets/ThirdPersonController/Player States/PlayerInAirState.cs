@@ -5,10 +5,14 @@ namespace ThirdPersonController
     [System.Serializable]
     public class PlayerInAirState : PlayerState
     {
-        [SerializeField] public float additionalGravity = 0f;
-        [SerializeField] float moveForce = 0f;
-        [SerializeField] float maxSpeed = 0f;
-        [SerializeField] float rotationSpeed = 0f;
+        [SerializeField, Tooltip("Additional force applied downwards")]
+        public float additionalGravity = 0f;
+        [SerializeField, Tooltip("Force applied to rigidbody when moving in air")]
+        float moveForce = 0f;
+        [SerializeField, Tooltip("Maximum speed after which there's no force applied")]
+        float maxSpeed = 0f;
+        [SerializeField, Tooltip("Speed of character rotation")]
+        float rotationSpeed = 0f;
 
         public override PlayerState Process(Vector3 inputWorldDirection)
         {

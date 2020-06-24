@@ -7,7 +7,6 @@ namespace ThirdPersonController
     {
         public Rigidbody rb = null;
         public Animator animator = null;
-        public CinemachineFreeLook cinemachineCamera = null;
         public new Camera camera = null;
         [Space]
 

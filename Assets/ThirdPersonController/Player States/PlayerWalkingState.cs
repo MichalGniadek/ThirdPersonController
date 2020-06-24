@@ -5,11 +5,16 @@ namespace ThirdPersonController
     [System.Serializable]
     public class PlayerWalkingState : PlayerState
     {
-        [SerializeField] float walkForce = 0f;
-        [SerializeField] float sprintForce = 0f;
-        [SerializeField] float maxSpeed = 0f;
-        [SerializeField] float rotationSpeed = 0f;
-        [SerializeField] float jumpForce = 0f;
+        [SerializeField, Tooltip("Force applied to rigidbody when walking")]
+        float walkForce = 0f;
+        [SerializeField, Tooltip("Force applied to rigidbody when sprinting")]
+        float sprintForce = 0f;
+        [SerializeField, Tooltip("Maximum speed after which there's no force applied")]
+        float maxSpeed = 0f;
+        [SerializeField, Tooltip("Speed of character rotation")]
+        float rotationSpeed = 0f;
+        [SerializeField, Tooltip("Force applied vertically to rigidbody when jumping")]
+        float jumpForce = 0f;
 
         bool isSprinting = false;
 

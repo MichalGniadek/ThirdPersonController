@@ -131,9 +131,9 @@ GameObject:
   m_Component:
   - component: {fileID: 71064269}
   - component: {fileID: 71064271}
+  - component: {fileID: 71064270}
   - component: {fileID: 71064272}
   - component: {fileID: 71064273}
-  - component: {fileID: 71064270}
   m_Layer: 0
   m_Name: Third Person Character
   m_TagString: Untagged
@@ -171,16 +171,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 71064271}
   animator: {fileID: 71064273}
-  cinemachineCamera: {fileID: 0}
   camera: {fileID: 963194227}
   walkingState:
-    stateEvents:
-      enter:
-        m_PersistentCalls:
-          m_Calls: []
-      exit:
-        m_PersistentCalls:
-          m_Calls: []
     movement: {fileID: 71064270}
     walkForce: 70
     sprintForce: 150
@@ -188,13 +180,6 @@ MonoBehaviour:
     rotationSpeed: 65
     jumpForce: 3000
   inAirState:
-    stateEvents:
-      enter:
-        m_PersistentCalls:
-          m_Calls: []
-      exit:
-        m_PersistentCalls:
-          m_Calls: []
     movement: {fileID: 0}
     additionalGravity: 50
     moveForce: 120
@@ -1775,7 +1760,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2066039573}
-  m_LocalRotation: {x: 0.04622492, y: -0.000000002399543, z: 0.000000005524551, w: 0.99893105}
+  m_LocalRotation: {x: 0.04622492, y: 0.000000001897454, z: 0.00000000532571, w: 0.99893105}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
