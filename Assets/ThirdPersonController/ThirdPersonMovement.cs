@@ -8,11 +8,14 @@ namespace ThirdPersonController
         public Rigidbody rb = null;
         public Animator animator = null;
         public new Camera camera = null;
-        [Space]
+
+        [SerializeField] LayerMask groundLayer = new LayerMask();
 
         #region States
-        public PlayerWalkingState walkingState = new PlayerWalkingState();
-        public PlayerInAirState inAirState = new PlayerInAirState();
+        [Space]
+        public WalkingState walkingState = new WalkingState();
+        public InAirState inAirState = new InAirState();
+        public DashState dashState = new DashState();
         #endregion
 
         PlayerState currentState;
@@ -22,12 +25,11 @@ namespace ThirdPersonController
         [HideInInspector] public bool isSprinting = false;
         [HideInInspector] public bool isJumping = false;
 
-        [SerializeField] LayerMask groundLayer = new LayerMask();
-
         void Awake()
         {
             walkingState.movement = this;
             inAirState.movement = this;
+            dashState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
@@ -63,22 +65,24 @@ namespace ThirdPersonController
 
         public bool OnGround()
         {
-            return Physics.Raycast(transform.position, Vector3.down,
-                0.1f, groundLayer) && rb.velocity.y <= 0;
+            return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
+                Vector3.down, 0.2f, groundLayer) && rb.velocity.y <= 0;
         }
 
         public bool Landing()
         {
-            return Physics.Raycast(transform.position, Vector3.down,
-                0.5f, groundLayer) && rb.velocity.y <= 0;
+            return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
+                Vector3.down, 0.6f, groundLayer) && rb.velocity.y <= 0;
         }
 
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position, Vector3.down * 0.1f);
+            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
+                Vector3.down * 0.2f);
             Gizmos.color = Color.green;
-            Gizmos.DrawRay(transform.position, Vector3.down * 0.5f);
+            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
+                Vector3.down * 0.6f);
         }
     }
 }

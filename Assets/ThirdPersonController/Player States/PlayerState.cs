@@ -9,26 +9,27 @@ namespace ThirdPersonController
         [System.Serializable]
         public struct StateEvents
         {
-            public UnityEvent enter;
-            public UnityEvent exit;
+            public UnityEvent onEnter;
+            public UnityEvent onExit;
         }
-        /*[SerializeField]*/
+
+        [SerializeField]
+        [Tooltip("Optional unity events called when entering/ exiting this state")]
         StateEvents stateEvents = new StateEvents();
 
-        [HideInInspector] public ThirdPersonMovement movement = null;
-
-        protected Vector3 CurrentVelocity => movement.rb.velocity;
+        [HideInInspector]
+        public ThirdPersonMovement movement = null;
 
         public void Enter()
         {
             EnterImpl();
-            stateEvents.enter?.Invoke();
+            stateEvents.onEnter?.Invoke();
         }
 
         public void Exit()
         {
             ExitImpl();
-            stateEvents.exit?.Invoke();
+            stateEvents.onExit?.Invoke();
         }
 
         public abstract PlayerState Process(Vector3 inputWorldDirection);
