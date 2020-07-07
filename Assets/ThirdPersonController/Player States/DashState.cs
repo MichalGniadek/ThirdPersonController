@@ -24,14 +24,14 @@ namespace ThirdPersonController
 
         public override void FixedProcess(Vector3 inputWorldDirection)
         {
-            movement.rb.AddForce(dashDirection * sustainedForce);
+            movement.rigidbody.AddForce(dashDirection * sustainedForce);
         }
 
         protected override void EnterImpl()
         {
             currentTime = duration;
-            dashDirection = movement.rb.velocity.Horizontal().normalized;
-            movement.rb.AddForce(dashDirection * impulseForce, ForceMode.Impulse);
+            dashDirection = movement.rigidbody.velocity.Horizontal().normalized;
+            movement.rigidbody.AddForce(dashDirection * impulseForce, ForceMode.Impulse);
         }
 
         protected override void ExitImpl() { }

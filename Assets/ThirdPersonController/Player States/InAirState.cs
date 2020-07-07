@@ -30,11 +30,11 @@ namespace ThirdPersonController
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
             {
                 currentAirJumps--;
-                movement.rb.AddForce(Vector3.up * airJumpForce);
+                movement.rigidbody.AddForce(Vector3.up * airJumpForce);
             }
 
             movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
-                movement.rb.velocity.Horizontal().magnitude / maxSpeed));
+                movement.rigidbody.velocity.Horizontal().magnitude / maxSpeed));
 
             movement.animator.SetBool("Landing", movement.Landing());
 
@@ -43,13 +43,13 @@ namespace ThirdPersonController
 
         public override void FixedProcess(Vector3 inputWorldDirection)
         {
-            movement.rb.AddForce(Vector3.down * additionalGravity);
+            movement.rigidbody.AddForce(Vector3.down * additionalGravity);
 
             if (inputWorldDirection.sqrMagnitude > 0.05f &&
-                movement.rb.velocity.Horizontal().magnitude < maxSpeed)
+                movement.rigidbody.velocity.Horizontal().magnitude < maxSpeed)
             {
                 // Movement
-                movement.rb.AddForce(inputWorldDirection.normalized * moveForce);
+                movement.rigidbody.AddForce(inputWorldDirection.normalized * moveForce);
 
                 // Rotation
                 float targetAngle = Mathf.Rad2Deg *
@@ -61,7 +61,7 @@ namespace ThirdPersonController
                 if (Mathf.Abs(deltaAngle) > 3f)
                 {
                     float angleDirection = Mathf.Sign(deltaAngle);
-                    movement.rb.AddTorque(0f, angleDirection * rotationSpeed, 0f);
+                    movement.rigidbody.AddTorque(0f, angleDirection * rotationSpeed, 0f);
                 }
             }
         }

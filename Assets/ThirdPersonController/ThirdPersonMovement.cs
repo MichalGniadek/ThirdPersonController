@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-using Cinemachine;
 
 namespace ThirdPersonController
 {
     public class ThirdPersonMovement : MonoBehaviour
     {
-        public Rigidbody rb = null;
         public Animator animator = null;
+        public new Rigidbody rigidbody = null;
+        public new Collider collider = null;
         public new Camera camera = null;
 
         [SerializeField] LayerMask groundLayer = new LayerMask();
@@ -16,6 +16,8 @@ namespace ThirdPersonController
         public WalkingState walkingState = new WalkingState();
         public InAirState inAirState = new InAirState();
         public DashState dashState = new DashState();
+        public RollState rollState = new RollState();
+        public SlideState slideState = new SlideState();
         #endregion
 
         PlayerState currentState;
@@ -25,11 +27,15 @@ namespace ThirdPersonController
         [HideInInspector] public bool isSprinting = false;
         [HideInInspector] public bool isJumping = false;
 
+        public float HorizontalVelocity => rigidbody.velocity.Horizontal().magnitude;
+
         void Awake()
         {
             walkingState.movement = this;
             inAirState.movement = this;
             dashState.movement = this;
+            rollState.movement = this;
+            slideState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
@@ -66,23 +72,23 @@ namespace ThirdPersonController
         public bool OnGround()
         {
             return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down, 0.2f, groundLayer) && rb.velocity.y <= 0;
+                Vector3.down, 0.2f, groundLayer) && rigidbody.velocity.y <= 0;
         }
 
         public bool Landing()
         {
             return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down, 0.6f, groundLayer) && rb.velocity.y <= 0;
+                Vector3.down, 0.6f, groundLayer) && rigidbody.velocity.y <= 0;
         }
 
         void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down * 0.2f);
             Gizmos.color = Color.green;
             Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
                 Vector3.down * 0.6f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
+                Vector3.down * 0.2f);
         }
     }
 }
