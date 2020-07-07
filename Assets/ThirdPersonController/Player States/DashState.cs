@@ -18,7 +18,11 @@ namespace ThirdPersonController
         public override PlayerState Process(Vector3 inputWorldDirection)
         {
             currentTime -= Time.deltaTime;
-            if (currentTime <= 0) return movement.inAirState;
+            if (currentTime <= 0)
+            {
+                if (movement.OnGround()) return movement.walkingState;
+                else return movement.inAirState;
+            }
             return this;
         }
 

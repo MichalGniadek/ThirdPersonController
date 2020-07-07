@@ -11,7 +11,8 @@ namespace ThirdPersonController
         float impulseForce = 0f;
         [SerializeField, Tooltip("Force applied each FixedUpdate")]
         float sustainedForce = 0f;
-        [SerializeField, Range(0, 1), Tooltip("Fraction of full height")]
+        [SerializeField, Range(0, 1)]
+        [Tooltip("Fraction of full height (y scale) that collider will change to")]
         float height = 1f;
 
         float currentTime = 0f;
@@ -31,6 +32,8 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
+            movement.animator.CrossFade("Roll", 0.1f);
+
             currentTime = duration;
             rollDirection = movement.rigidbody.velocity.Horizontal().normalized;
             movement.rigidbody.AddForce(rollDirection * impulseForce, ForceMode.Impulse);

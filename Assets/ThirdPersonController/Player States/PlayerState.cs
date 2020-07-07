@@ -3,6 +3,12 @@ using UnityEngine.Events;
 
 namespace ThirdPersonController
 {
+    /// <summary>
+    /// Basic finite state machine. Calls EnterImpl() and onEnter unity event
+    /// when entering a state, and ExitImpl() and onExit when exiting.
+    /// 
+    /// Calls Process every Update and FixedProcess every FixedUpdate.
+    /// </summary>
     [System.Serializable]
     public abstract class PlayerState
     {
@@ -32,6 +38,10 @@ namespace ThirdPersonController
             stateEvents.onExit?.Invoke();
         }
 
+        /// <summary>
+        /// Called every update if state is active. Return state FSM should change to.
+        /// Return this if you don't want to change state.
+        /// </summary>
         public abstract PlayerState Process(Vector3 inputWorldDirection);
         public abstract void FixedProcess(Vector3 inputWorldDirection);
         protected abstract void EnterImpl();

@@ -23,21 +23,21 @@ namespace ThirdPersonController
 
         public override PlayerState Process(Vector3 inputWorldDirection)
         {
-            if (movement.OnGround()) return movement.walkingState;
+            // So we don't detect ground immediately after jumping
+            if (movement.TimeSinceStateChange > 0.1f && movement.OnGround())
+            {
+                movement.animator.CrossFade("Land", 0.1f);
+                return movement.walkingState;
+            }
 
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
             {
+                movement.animator.CrossFade("Jump", 0.1f);
                 currentAirJumps--;
                 movement.rigidbody.AddForce(Vector3.up * airJumpForce);
             }
-
-            movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
-                movement.rigidbody.velocity.Horizontal().magnitude / maxSpeed));
-
-            movement.animator.SetBool("Landing", movement.Landing());
-
             return this;
         }
 
@@ -68,13 +68,9 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
-            movement.animator.SetBool("InAir", true);
             currentAirJumps = numberOfAirJumps;
         }
 
-        protected override void ExitImpl()
-        {
-            movement.animator.SetBool("InAir", false);
-        }
+        protected override void ExitImpl() { }
     }
 }

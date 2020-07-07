@@ -20,6 +20,9 @@ namespace ThirdPersonController
         public SlideState slideState = new SlideState();
         #endregion
 
+        float timeSinceStateChange = 0f;
+        public float TimeSinceStateChange => timeSinceStateChange;
+
         PlayerState currentState;
 
         [HideInInspector] public Vector3 inputWorldDirection = new Vector3();
@@ -61,6 +64,12 @@ namespace ThirdPersonController
                 currentState.Exit();
                 currentState = newState;
                 currentState.Enter();
+
+                timeSinceStateChange = 0f;
+            }
+            else
+            {
+                timeSinceStateChange += Time.deltaTime;
             }
         }
 
@@ -72,23 +81,14 @@ namespace ThirdPersonController
         public bool OnGround()
         {
             return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down, 0.2f, groundLayer) && rigidbody.velocity.y <= 0;
-        }
-
-        public bool Landing()
-        {
-            return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down, 0.6f, groundLayer) && rigidbody.velocity.y <= 0;
+                Vector3.down, 0.15f, groundLayer) && rigidbody.velocity.y <= 0;
         }
 
         void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.green;
-            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down * 0.6f);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down * 0.2f);
+                Vector3.down * 0.15f);
         }
     }
 }

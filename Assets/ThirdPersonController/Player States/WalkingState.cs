@@ -37,18 +37,32 @@ namespace ThirdPersonController
         {
             if (Input.GetKey(KeyCode.LeftControl))
             {
-                if (movement.HorizontalVelocity < minSpeedForSlide)
+                if (movement.HorizontalVelocity > minSpeedForSlide)
+                {
+                    return movement.slideState;
+                }
+                else if (mode != Mode.Crouching)
+                {
                     mode = Mode.Crouching;
-                else return movement.slideState;
+                    movement.animator.CrossFade("Crouch", 0.2f);
+                }
             }
             else if (Input.GetKey(KeyCode.LeftShift)) mode = Mode.Sprinting;
-            else mode = Mode.Walking;
+            else
+            {
+                if (mode == Mode.Crouching)
+                {
+                    movement.animator.CrossFade("Walk", 0.2f);
+                }
+                mode = Mode.Walking;
+            }
 
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
             if (Input.GetKeyDown(KeyCode.Q)) return movement.rollState;
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                movement.animator.CrossFade("Jump", 0.1f);
                 movement.rigidbody.AddForce(Vector3.up * jumpForce);
                 return movement.inAirState;
             }
@@ -84,7 +98,10 @@ namespace ThirdPersonController
             }
         }
 
-        protected override void EnterImpl() { }
+        protected override void EnterImpl()
+        {
+            mode = Mode.Walking;
+        }
         protected override void ExitImpl() { }
     }
 }
