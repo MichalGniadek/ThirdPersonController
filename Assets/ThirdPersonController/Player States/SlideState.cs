@@ -5,6 +5,8 @@ namespace ThirdPersonController
     [System.Serializable]
     public class SlideState : PlayerState
     {
+        const float slideAnimationDuration = 1.533f;
+
         [SerializeField, Min(0)]
         float duration = 0f;
         [SerializeField, Tooltip("Force applied once when entered state")]
@@ -32,6 +34,8 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
+            movement.animator.SetFloat("Slide Duration Modifier",
+                1 / slideAnimationDuration / duration);
             movement.animator.CrossFade("Slide", 0.1f);
 
             currentTime = duration;

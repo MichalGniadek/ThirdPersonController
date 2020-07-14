@@ -5,6 +5,8 @@ namespace ThirdPersonController
     [System.Serializable]
     public class RollState : PlayerState
     {
+        const float rollAnimationDuration = 1.167f;
+
         [SerializeField, Min(0)]
         float duration = 0f;
         [SerializeField, Tooltip("Force applied once when entered state")]
@@ -32,6 +34,8 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
+            movement.animator.SetFloat("Roll Duration Modifier",
+                1 / rollAnimationDuration / duration);
             movement.animator.CrossFade("Roll", 0.1f);
 
             currentTime = duration;
