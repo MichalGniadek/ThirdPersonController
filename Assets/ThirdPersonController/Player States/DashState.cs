@@ -11,6 +11,8 @@ namespace ThirdPersonController
         float impulseForce = 0f;
         [SerializeField, Tooltip("Force applied each FixedUpdate")]
         float sustainedForce = 0f;
+        [SerializeField, Tooltip("Force applied once downwards when dash ends")]
+        float downForce = 0f;
 
         float currentTime = 0f;
         Vector3 dashDirection;
@@ -20,6 +22,7 @@ namespace ThirdPersonController
             currentTime -= Time.deltaTime;
             if (currentTime <= 0)
             {
+                movement.rigidbody.AddForce(downForce * Vector3.down, ForceMode.Impulse);
                 if (movement.OnGround()) return movement.walkingState;
                 else return movement.inAirState;
             }
