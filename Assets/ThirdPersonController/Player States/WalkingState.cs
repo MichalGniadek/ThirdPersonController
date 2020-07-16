@@ -68,33 +68,50 @@ namespace ThirdPersonController
             }
 
             movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
-                movement.HorizontalVelocity / maxSpeed));
+                movement.HorizontalVelocity / maxSpeed), 0.1f, Time.deltaTime);
+
+            if (movement.inputWorldDirection.magnitude > 0)
+            {
+                float targetAngle = Mathf.Rad2Deg * Mathf.Atan2(
+                    movement.inputWorldDirection.x,
+                    movement.inputWorldDirection.z) - 90;
+
+                movement.model.rotation = Quaternion.Euler(0, targetAngle, 0);
+            }
 
             return this;
         }
 
-        public override void FixedProcess(Vector3 inputWorldDirection)
+        public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
             movement.rigidbody.AddForce(Vector3.down);
 
-            if (inputWorldDirection.sqrMagnitude > 0.05f &&
-                movement.HorizontalVelocity < maxSpeed)
+            // Counter movement
+            if (velocityRelativeToCamera.x * movement.inputDirection.x <= 0)
             {
-                // Movement
-                movement.rigidbody.AddForce(inputWorldDirection.normalized * GetForce());
+                movement.rigidbody.AddForce(movement.HorizontalDrag
+                                            * velocityRelativeToCamera.x
+                                            * -movement.CameraForward);
+            }
+            if (velocityRelativeToCamera.z * movement.inputDirection.z <= 0)
+            {
+                movement.rigidbody.AddForce(movement.HorizontalDrag
+                                            * velocityRelativeToCamera.z
+                                            * -movement.CameraRight);
+            }
 
-                // Rotation
-                float targetAngle = Mathf.Rad2Deg *
-                    Mathf.Atan2(inputWorldDirection.x, inputWorldDirection.z);
+            if ((movement.inputDirection.x > 0 && velocityRelativeToCamera.x < maxSpeed)
+            || (movement.inputDirection.x < 0 && velocityRelativeToCamera.x > -maxSpeed))
+            {
+                movement.rigidbody.AddForce(GetForce() * movement.CameraForward
+                    * Mathf.Sign(movement.inputDirection.x));
+            }
 
-                float deltaAngle =
-                    Mathf.DeltaAngle(movement.transform.eulerAngles.y, targetAngle);
-
-                if (Mathf.Abs(deltaAngle) > 3f)
-                {
-                    float angleDirection = Mathf.Sign(deltaAngle);
-                    movement.rigidbody.AddTorque(0f, angleDirection * rotationSpeed, 0f);
-                }
+            if ((movement.inputDirection.z > 0 && velocityRelativeToCamera.z < maxSpeed)
+            || (movement.inputDirection.z < 0 && velocityRelativeToCamera.z > -maxSpeed))
+            {
+                movement.rigidbody.AddForce(GetForce() * movement.CameraRight
+                    * Mathf.Sign(movement.inputDirection.z));
             }
         }
 

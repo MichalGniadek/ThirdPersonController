@@ -8,8 +8,13 @@ namespace ThirdPersonController
         public new Rigidbody rigidbody = null;
         public new Collider collider = null;
         public new Camera camera = null;
+        public Transform model = null;
 
         [SerializeField] LayerMask groundLayer = new LayerMask();
+
+        [Space]
+        [SerializeField] float horizontalDrag = 0f;
+        public float HorizontalDrag => horizontalDrag;
 
         #region States
         [Space]
@@ -32,6 +37,14 @@ namespace ThirdPersonController
 
         public float HorizontalVelocity => rigidbody.velocity.Horizontal().magnitude;
 
+        public Vector3 CameraForward =>
+                camera.transform.forward.Horizontal().normalized;
+
+        public Vector3 CameraRight =>
+                camera.transform.right.Horizontal().normalized;
+
+        public Vector3 inputDirection = new Vector2();
+
         void Awake()
         {
             walkingState.movement = this;
@@ -49,9 +62,10 @@ namespace ThirdPersonController
 
         void Update()
         {
-            Vector2 inputDirection = new Vector2(
-                 Input.GetAxis("Horizontal"),
-                 Input.GetAxis("Vertical")
+            inputDirection = new Vector3(
+                 Input.GetAxis("Vertical"),
+                 0f,
+                 Input.GetAxis("Horizontal")
             ).normalized;
 
             inputWorldDirection =
@@ -75,7 +89,22 @@ namespace ThirdPersonController
 
         void FixedUpdate()
         {
-            currentState.FixedProcess(inputWorldDirection.normalized);
+            currentState.FixedProcess(GetVelocityRelativeToCamera());
+        }
+
+        Vector3 GetVelocityRelativeToCamera()
+        {
+            float lookAngle = camera.transform.rotation.eulerAngles.y;
+            float moveAngle = Mathf.Rad2Deg *
+                Mathf.Atan2(rigidbody.velocity.x, rigidbody.velocity.z);
+
+            float deltaAngle = Mathf.DeltaAngle(lookAngle, moveAngle);
+
+            return new Vector3(
+                Mathf.Cos(deltaAngle * Mathf.Deg2Rad),
+                0f,
+                Mathf.Cos((90 - deltaAngle) * Mathf.Deg2Rad)
+            ) * rigidbody.velocity.magnitude;
         }
 
         public bool OnGround()
