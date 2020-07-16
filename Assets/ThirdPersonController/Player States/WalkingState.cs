@@ -68,7 +68,7 @@ namespace ThirdPersonController
             }
 
             movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
-                movement.HorizontalVelocity / maxSpeed), 0.1f, Time.deltaTime);
+                movement.HorizontalVelocity / maxSpeed));//, 0.2f, Time.deltaTime);
 
             if (movement.inputWorldDirection.magnitude > 0)
             {
@@ -107,10 +107,10 @@ namespace ThirdPersonController
                     * Mathf.Sign(movement.inputDirection.x));
             }
 
-            if ((movement.inputDirection.z > 0 && velocityRelativeToCamera.z < maxSpeed)
-            || (movement.inputDirection.z < 0 && velocityRelativeToCamera.z > -maxSpeed))
+            if ((movement.inputDirection.z > 0 && velocityRelativeToCamera.z < 0.4 * maxSpeed)
+            || (movement.inputDirection.z < 0 && velocityRelativeToCamera.z > 0.4 * -maxSpeed))
             {
-                movement.rigidbody.AddForce(GetForce() * movement.CameraRight
+                movement.rigidbody.AddForce(GetForce() * 0.4f * movement.CameraRight
                     * Mathf.Sign(movement.inputDirection.z));
             }
         }
