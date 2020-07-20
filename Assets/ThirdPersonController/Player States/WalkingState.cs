@@ -7,6 +7,8 @@ namespace ThirdPersonController
     {
         [SerializeField, Tooltip("Force applied when moving")]
         float moveForce = 0f;
+        [SerializeField, Tooltip("Force applied to stop movement")]
+        float horizontalDrag = 0f;
         [SerializeField, Tooltip("Maximum speed when walking")]
         float walkSpeed = 0f;
         [SerializeField, Tooltip("Maximum speed when sprinting")]
@@ -62,8 +64,7 @@ namespace ThirdPersonController
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                movement.animator.CrossFade("Jump", 0.1f);
-                movement.rigidbody.AddForce(Vector3.up * jumpForce);
+                Jump(jumpForce);
                 return movement.inAirState;
             }
 
@@ -86,31 +87,15 @@ namespace ThirdPersonController
         {
             movement.rigidbody.AddForce(Vector3.down);
 
-            HandleMovementInAxis(velocityRelativeToCamera.x, movement.inputDirection.x,
-                movement.CameraForward, GetMaxSpeed());
-            HandleMovementInAxis(velocityRelativeToCamera.z, movement.inputDirection.z,
-                movement.CameraRight, GetMaxSpeed() * sideMaxSpeedMutliplier);
+            HandleMovementInAxis(
+                velocityRelativeToCamera.x, movement.inputDirection.x,
+                movement.CameraForward, GetMaxSpeed(),
+                horizontalDrag, moveForce);
 
-            void HandleMovementInAxis(float velocity, float input, Vector3 direction,
-                float axisMaxSpeed)
-            {
-                // Counter movement
-                // Either opposite or input is zero 
-                // or velocity 0 (=> applied force is also zero)
-                if (velocity * input <= 0)
-                {
-                    movement.rigidbody.AddForce(movement.HorizontalDrag
-                                                * velocity
-                                                * -direction);
-                }
-
-                if ((input > 0 && velocity < axisMaxSpeed) ||
-                    (input < 0 && velocity > -axisMaxSpeed))
-                {
-                    movement.rigidbody.AddForce(moveForce * direction
-                        * Mathf.Sign(input));
-                }
-            }
+            HandleMovementInAxis(
+                velocityRelativeToCamera.z, movement.inputDirection.z,
+                movement.CameraRight, GetMaxSpeed() * sideMaxSpeedMutliplier,
+                horizontalDrag, moveForce);
         }
 
         protected override void EnterImpl()

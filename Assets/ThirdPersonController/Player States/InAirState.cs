@@ -7,12 +7,12 @@ namespace ThirdPersonController
     {
         [SerializeField, Tooltip("Additional force applied downwards")]
         public float additionalGravity = 0f;
+        [SerializeField, Tooltip("Force applied to stop movement")]
+        float horizontalDrag = 0f;
         [SerializeField, Tooltip("Force applied to rigidbody when moving in air")]
         float moveForce = 0f;
         [SerializeField, Tooltip("Maximum speed after which there's no force applied")]
         float maxSpeed = 0f;
-        [SerializeField, Tooltip("Speed of character rotation")]
-        float rotationSpeed = 0f;
         [Space]
         [SerializeField, Tooltip("Number of additional airjumps"), Min(0)]
         int numberOfAirJumps = 0;
@@ -21,7 +21,7 @@ namespace ThirdPersonController
 
         int currentAirJumps = 0;
 
-        public override PlayerState Process(Vector3 inputWorldDirection)
+        public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             // So we don't detect ground immediately after jumping
             if (movement.TimeSinceStateChange > 0.1f && movement.OnGround())
@@ -33,37 +33,32 @@ namespace ThirdPersonController
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
+                Jump(airJumpForce);
+
+            // Rotation
+            if (movement.inputWorldDirection.magnitude > 0)
             {
-                movement.animator.CrossFade("Jump", 0.1f);
-                currentAirJumps--;
-                movement.rigidbody.AddForce(Vector3.up * airJumpForce);
+                float targetAngle = Mathf.Rad2Deg * Mathf.Atan2(
+                    movement.inputWorldDirection.x,
+                    movement.inputWorldDirection.z) - 90;
+
+                movement.model.rotation = Quaternion.Euler(0, targetAngle, 0);
             }
             return this;
         }
 
-        public override void FixedProcess(Vector3 inputWorldDirection)
+        public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
             movement.rigidbody.AddForce(Vector3.down * additionalGravity);
 
-            if (inputWorldDirection.sqrMagnitude > 0.05f &&
-                movement.rigidbody.velocity.Horizontal().magnitude < maxSpeed)
-            {
-                // Movement
-                movement.rigidbody.AddForce(inputWorldDirection.normalized * moveForce);
-
-                // Rotation
-                float targetAngle = Mathf.Rad2Deg *
-                    Mathf.Atan2(inputWorldDirection.x, inputWorldDirection.z);
-
-                float deltaAngle =
-                    Mathf.DeltaAngle(movement.transform.eulerAngles.y, targetAngle);
-
-                if (Mathf.Abs(deltaAngle) > 3f)
-                {
-                    float angleDirection = Mathf.Sign(deltaAngle);
-                    movement.rigidbody.AddTorque(0f, angleDirection * rotationSpeed, 0f);
-                }
-            }
+            HandleMovementInAxis(
+                velocityRelativeToCamera.x, movement.inputDirection.x,
+                movement.CameraForward, maxSpeed,
+                horizontalDrag, moveForce);
+            HandleMovementInAxis(
+                velocityRelativeToCamera.z, movement.inputDirection.z,
+                movement.CameraRight, maxSpeed,
+                horizontalDrag, moveForce);
         }
 
         protected override void EnterImpl()

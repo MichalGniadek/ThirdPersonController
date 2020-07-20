@@ -12,10 +12,6 @@ namespace ThirdPersonController
 
         [SerializeField] LayerMask groundLayer = new LayerMask();
 
-        [Space]
-        [SerializeField] float horizontalDrag = 0f;
-        public float HorizontalDrag => horizontalDrag;
-
         #region States
         [Space]
         public WalkingState walkingState = new WalkingState();

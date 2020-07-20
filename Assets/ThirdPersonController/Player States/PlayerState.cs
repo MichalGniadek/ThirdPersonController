@@ -39,6 +39,41 @@ namespace ThirdPersonController
         }
 
         /// <summary>
+        /// Change animation, reset y velocity and apply force
+        /// </summary>
+        protected void Jump(float force)
+        {
+            movement.animator.CrossFade("Jump", 0.1f);
+            var vel = movement.rigidbody.velocity;
+            vel.y = 0f;
+            movement.rigidbody.velocity = vel;
+            movement.rigidbody.AddForce(Vector3.up * force);
+        }
+
+        protected void HandleMovementInAxis(
+            float currentVelocity, float input,
+            Vector3 axisDirection, float axisMaxSpeed,
+            float horizontalDrag, float moveForce)
+        {
+            // Counter movement
+            // Either opposite or input is zero 
+            // or velocity 0 (=> applied force is also zero)
+            if (currentVelocity * input <= 0)
+            {
+                movement.rigidbody.AddForce(horizontalDrag
+                                            * currentVelocity
+                                            * -axisDirection);
+            }
+
+            if ((input > 0 && currentVelocity < axisMaxSpeed) ||
+                (input < 0 && currentVelocity > -axisMaxSpeed))
+            {
+                movement.rigidbody.AddForce(moveForce * axisDirection
+                    * Mathf.Sign(input));
+            }
+        }
+
+        /// <summary>
         /// Called every update if state is active. Return state FSM should change to.
         /// Return this if you don't want to change state.
         /// </summary>
