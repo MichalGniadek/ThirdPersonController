@@ -35,15 +35,8 @@ namespace ThirdPersonController
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
                 Jump(airJumpForce);
 
-            // Rotation
-            if (movement.inputWorldDirection.magnitude > 0)
-            {
-                float targetAngle = Mathf.Rad2Deg * Mathf.Atan2(
-                    movement.inputWorldDirection.x,
-                    movement.inputWorldDirection.z) - 90;
+            HandleRotation();
 
-                movement.model.rotation = Quaternion.Euler(0, targetAngle, 0);
-            }
             return this;
         }
 

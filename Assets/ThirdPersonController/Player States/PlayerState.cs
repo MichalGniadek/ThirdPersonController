@@ -73,6 +73,19 @@ namespace ThirdPersonController
             }
         }
 
+        protected void HandleRotation()
+        {
+            Vector3 horizontalVelocity = movement.rigidbody.velocity.Horizontal();
+            if (horizontalVelocity.magnitude > 0.1f)
+            {
+                float targetAngle = Mathf.Rad2Deg * Mathf.Atan2(
+                    horizontalVelocity.x,
+                    horizontalVelocity.z);
+
+                movement.model.rotation = Quaternion.Euler(0, targetAngle, 0);
+            }
+        }
+
         /// <summary>
         /// Called every update if state is active. Return state FSM should change to.
         /// Return this if you don't want to change state.
