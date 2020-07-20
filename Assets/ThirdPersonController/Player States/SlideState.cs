@@ -24,6 +24,9 @@ namespace ThirdPersonController
         {
             currentTime -= Time.deltaTime;
             if (currentTime <= 0) return movement.walkingState;
+
+            HandleRotation();
+
             return this;
         }
 
@@ -39,7 +42,7 @@ namespace ThirdPersonController
             movement.animator.CrossFade("Slide", 0.1f);
 
             currentTime = duration;
-            slideDirection = movement.rigidbody.velocity.Horizontal().normalized;
+            slideDirection = movement.CameraForward.Horizontal().normalized;
             movement.rigidbody.AddForce(slideDirection * impulseForce, ForceMode.Impulse);
 
             SetHeight(height);
