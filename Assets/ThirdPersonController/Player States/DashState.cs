@@ -37,7 +37,7 @@ namespace ThirdPersonController
         protected override void EnterImpl()
         {
             currentTime = duration;
-            dashDirection = movement.rigidbody.velocity.Horizontal().normalized;
+            dashDirection = movement.CameraForward.Horizontal().normalized;
             movement.rigidbody.AddForce(dashDirection * impulseForce, ForceMode.Impulse);
         }
 

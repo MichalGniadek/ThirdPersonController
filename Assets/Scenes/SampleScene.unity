@@ -219,9 +219,9 @@ MonoBehaviour:
           m_Calls: []
     movement: {fileID: 71064270}
     duration: 0.5
-    impulseForce: 200
-    sustainedForce: 150
-    downForce: 10
+    impulseForce: 80
+    sustainedForce: -100
+    downForce: 3
   rollState:
     stateEvents:
       onEnter:
@@ -248,7 +248,7 @@ MonoBehaviour:
     impulseForce: 0
     sustainedForce: 100
     height: 0.4
-  inputWorldDirection: {x: 0, y: 0, z: 0}
+  inputWorldDirection: {x: 0, y: 0, z: -0}
   isSprinting: 0
   isJumping: 0
   inputDirection: {x: 0, y: 0, z: 0}
@@ -2576,7 +2576,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 385540847}
-  m_LocalRotation: {x: 0.06433937, y: 0.000000005994986, z: -0.000000026680134, w: 0.9979281}
+  m_LocalRotation: {x: 0.06433937, y: -0.0000000025903792, z: -0.00000002612661, w: 0.9979281}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -5006,7 +5006,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.06433936, y: 0.000000008585365, z: -5.535238e-10, w: 0.9979281}
+  m_LocalRotation: {x: 0.06433936, y: -0.000000008585365, z: 5.535238e-10, w: 0.9979281}
   m_LocalPosition: {x: 0, y: 8, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -9713,7 +9713,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2066039573}
-  m_LocalRotation: {x: 0.046224914, y: 0.000000001897454, z: 0.000000005325711, w: 0.9989311}
+  m_LocalRotation: {x: 0.046224914, y: -0.0000000023995437, z: 0.000000005524552,
+    w: 0.9989311}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
