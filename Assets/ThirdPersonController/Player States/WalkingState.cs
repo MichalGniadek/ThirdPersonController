@@ -5,35 +5,35 @@ namespace ThirdPersonController
     [System.Serializable]
     public class WalkingState : PlayerState
     {
-        [SerializeField, Tooltip("Force applied to rigidbody when walking")]
-        float walkForce = 0f;
-        [SerializeField, Tooltip("Force applied to rigidbody when sprinting")]
-        float sprintForce = 0f;
-        [SerializeField, Tooltip("Force applied to rigidbody when crouching")]
-        float crouchForce = 0f;
-        [SerializeField, Tooltip("Dictates whether you slide or crouch")]
+        [SerializeField, Tooltip("Force applied when moving")]
+        float moveForce = 0f;
+        [SerializeField, Tooltip("Maximum speed when walking")]
+        float walkSpeed = 0f;
+        [SerializeField, Tooltip("Maximum speed when sprinting")]
+        float sprintSpeed = 0f;
+        [SerializeField, Tooltip("Maximum speed when crouching")]
+        float crouchSpeed = 0f;
+        [SerializeField, Tooltip("Mulitplier applied to max speed to sideways movement")]
+        float sideMaxSpeedMutliplier = 0f;
+        [SerializeField, Tooltip("Minimum speed when you slide instead of crouching")]
         float minSpeedForSlide = 0f;
-        [SerializeField, Tooltip("Maximum speed after which there's no force applied")]
-        float maxSpeed = 0f;
-        [SerializeField, Tooltip("Speed of character rotation")]
-        float rotationSpeed = 0f;
-        [SerializeField, Tooltip("Force applied vertically to rigidbody when jumping")]
+        [SerializeField, Tooltip("Force applied when jumping")]
         float jumpForce = 0f;
 
         enum Mode { Walking, Sprinting, Crouching }
         Mode mode = Mode.Walking;
 
-        float GetForce()
+        float GetMaxSpeed()
         {
             switch (mode)
             {
-                case Mode.Sprinting: return sprintForce;
-                case Mode.Crouching: return crouchForce;
-                default: return walkForce;
+                case Mode.Sprinting: return sprintSpeed;
+                case Mode.Crouching: return crouchSpeed;
+                default: return walkSpeed;
             }
         }
 
-        public override PlayerState Process(Vector3 inputWorldDirection)
+        public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             if (Input.GetKey(KeyCode.LeftControl))
             {
@@ -67,8 +67,8 @@ namespace ThirdPersonController
                 return movement.inAirState;
             }
 
-            movement.animator.SetFloat("WalkingSpeed", Mathf.Min(1f,
-                movement.HorizontalVelocity / maxSpeed));//, 0.2f, Time.deltaTime);
+            movement.animator.SetFloat("WalkingSpeed",
+                Mathf.Min(1f, movement.HorizontalVelocity / sprintSpeed));
 
             if (movement.inputWorldDirection.magnitude > 0)
             {
@@ -86,32 +86,30 @@ namespace ThirdPersonController
         {
             movement.rigidbody.AddForce(Vector3.down);
 
-            // Counter movement
-            if (velocityRelativeToCamera.x * movement.inputDirection.x <= 0)
-            {
-                movement.rigidbody.AddForce(movement.HorizontalDrag
-                                            * velocityRelativeToCamera.x
-                                            * -movement.CameraForward);
-            }
-            if (velocityRelativeToCamera.z * movement.inputDirection.z <= 0)
-            {
-                movement.rigidbody.AddForce(movement.HorizontalDrag
-                                            * velocityRelativeToCamera.z
-                                            * -movement.CameraRight);
-            }
+            HandleMovementInAxis(velocityRelativeToCamera.x, movement.inputDirection.x,
+                movement.CameraForward, GetMaxSpeed());
+            HandleMovementInAxis(velocityRelativeToCamera.z, movement.inputDirection.z,
+                movement.CameraRight, GetMaxSpeed() * sideMaxSpeedMutliplier);
 
-            if ((movement.inputDirection.x > 0 && velocityRelativeToCamera.x < maxSpeed)
-            || (movement.inputDirection.x < 0 && velocityRelativeToCamera.x > -maxSpeed))
+            void HandleMovementInAxis(float velocity, float input, Vector3 direction,
+                float axisMaxSpeed)
             {
-                movement.rigidbody.AddForce(GetForce() * movement.CameraForward
-                    * Mathf.Sign(movement.inputDirection.x));
-            }
+                // Counter movement
+                // Either opposite or input is zero 
+                // or velocity 0 (=> applied force is also zero)
+                if (velocity * input <= 0)
+                {
+                    movement.rigidbody.AddForce(movement.HorizontalDrag
+                                                * velocity
+                                                * -direction);
+                }
 
-            if ((movement.inputDirection.z > 0 && velocityRelativeToCamera.z < 0.4 * maxSpeed)
-            || (movement.inputDirection.z < 0 && velocityRelativeToCamera.z > 0.4 * -maxSpeed))
-            {
-                movement.rigidbody.AddForce(GetForce() * 0.4f * movement.CameraRight
-                    * Mathf.Sign(movement.inputDirection.z));
+                if ((input > 0 && velocity < axisMaxSpeed) ||
+                    (input < 0 && velocity > -axisMaxSpeed))
+                {
+                    movement.rigidbody.AddForce(moveForce * direction
+                        * Mathf.Sign(input));
+                }
             }
         }
 

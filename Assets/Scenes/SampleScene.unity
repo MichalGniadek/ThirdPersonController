@@ -187,13 +187,13 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
     movement: {fileID: 0}
-    walkForce: 60
-    sprintForce: 130
-    crouchForce: 35
-    minSpeedForSlide: 10
-    maxSpeed: 20
-    rotationSpeed: 65
-    jumpForce: 3200
+    moveForce: 60
+    walkSpeed: 15
+    sprintSpeed: 25
+    crouchSpeed: 10
+    sideMaxSpeedMutliplier: 0.4
+    minSpeedForSlide: 12
+    jumpForce: 320
   inAirState:
     stateEvents:
       onEnter:
@@ -2576,7 +2576,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 385540847}
-  m_LocalRotation: {x: 0.06433937, y: 0.000000005994986, z: -0.000000026680134, w: 0.9979281}
+  m_LocalRotation: {x: 0.06433937, y: -0.0000000025903792, z: -0.00000002612661, w: 0.9979281}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -5006,7 +5006,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.06433936, y: 0.000000008585365, z: -5.535238e-10, w: 0.9979281}
+  m_LocalRotation: {x: 0.06433936, y: -0.000000008585365, z: 5.535238e-10, w: 0.9979281}
   m_LocalPosition: {x: 0, y: 8, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -7744,7 +7744,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438854812}
-  m_LocalRotation: {x: 0.08248053, y: 0.0000000018111549, z: -0.000000021883755, w: 0.9965927}
+  m_LocalRotation: {x: 0.08248053, y: 0.0000000018111547, z: -0.000000021883755, w: 0.9965927}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
