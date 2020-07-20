@@ -33,7 +33,10 @@ namespace ThirdPersonController
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
+            {
+                currentAirJumps--;
                 Jump(airJumpForce);
+            }
 
             HandleRotation();
 

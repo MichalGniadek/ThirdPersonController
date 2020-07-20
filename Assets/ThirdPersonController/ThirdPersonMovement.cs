@@ -39,7 +39,7 @@ namespace ThirdPersonController
         public Vector3 CameraRight =>
                 camera.transform.right.Horizontal().normalized;
 
-        public Vector3 inputDirection = new Vector2();
+        [HideInInspector] public Vector3 inputDirection = new Vector3();
 
         void Awake()
         {
