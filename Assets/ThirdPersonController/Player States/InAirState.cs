@@ -38,7 +38,8 @@ namespace ThirdPersonController
                 Jump(airJumpForce);
             }
 
-            HandleRotation();
+            if (movement.inputDirection.magnitude > 0.1f)
+                HandleRotation();
 
             return this;
         }

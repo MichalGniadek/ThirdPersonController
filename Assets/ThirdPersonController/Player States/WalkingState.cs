@@ -62,6 +62,12 @@ namespace ThirdPersonController
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
             if (Input.GetKeyDown(KeyCode.Q)) return movement.rollState;
 
+            if (!movement.OnGround())
+            {
+                movement.animator.CrossFade("Fall", 0.5f);
+                return movement.inAirState;
+            }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Jump(jumpForce);
