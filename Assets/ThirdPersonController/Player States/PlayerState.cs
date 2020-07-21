@@ -82,6 +82,14 @@ namespace ThirdPersonController
                     horizontalVelocity.x,
                     horizontalVelocity.z);
 
+                float deltaAngle = Mathf.DeltaAngle(targetAngle,
+                    movement.model.rotation.eulerAngles.y);
+
+                deltaAngle = Mathf.Clamp(deltaAngle, -1f, 1f);
+
+                movement.animator.SetFloat("Turning Speed", deltaAngle,
+                    0.1f, Time.deltaTime);
+
                 movement.model.rotation = Quaternion.Euler(0, targetAngle, 0);
             }
         }

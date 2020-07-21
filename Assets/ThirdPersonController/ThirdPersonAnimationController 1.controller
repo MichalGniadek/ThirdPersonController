@@ -171,8 +171,8 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: -203655887218126122, guid: 269da693c9d02824b92ff14b4e27e5a0,
       type: 3}
-    m_Threshold: 0.6
-    m_Position: {x: 0, y: 0}
+    m_Threshold: 0.4
+    m_Position: {x: 0, y: 0.5}
     m_TimeScale: 1.4
     m_CycleOffset: 0
     m_DirectBlendParameter: WalkingSpeed
@@ -180,19 +180,37 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: -203655887218126122, guid: 4cde027cc4ac1b84ca7e87a91211e293,
       type: 3}
-    m_Threshold: 1
-    m_Position: {x: 0, y: 0}
+    m_Threshold: 0.6
+    m_Position: {x: 0, y: 1}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: WalkingSpeed
     m_Mirror: 0
-  m_BlendParameter: WalkingSpeed
+  - serializedVersion: 2
+    m_Motion: {fileID: -203655887218126122, guid: 12f7ae18aaeb72c489ebfb36cf564828,
+      type: 3}
+    m_Threshold: 0.8
+    m_Position: {x: -1.5, y: 1}
+    m_TimeScale: 1.4
+    m_CycleOffset: 0
+    m_DirectBlendParameter: WalkingSpeed
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: -203655887218126122, guid: 12f7ae18aaeb72c489ebfb36cf564828,
+      type: 3}
+    m_Threshold: 1
+    m_Position: {x: 1.5, y: 1}
+    m_TimeScale: 1.4
+    m_CycleOffset: 0.5
+    m_DirectBlendParameter: WalkingSpeed
+    m_Mirror: 1
+  m_BlendParameter: Turning Speed
   m_BlendParameterY: WalkingSpeed
   m_MinThreshold: 0.2
   m_MaxThreshold: 1
   m_UseAutomaticThresholds: 1
   m_NormalizedBlendValues: 0
-  m_BlendType: 0
+  m_BlendType: 3
 --- !u!91 &9100000
 AnimatorController:
   m_ObjectHideFlags: 0
@@ -207,19 +225,25 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: Roll Duration Modifier
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: Slide Duration Modifier
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
+  - m_Name: Turning Speed
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
