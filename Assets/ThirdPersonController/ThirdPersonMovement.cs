@@ -110,21 +110,21 @@ namespace ThirdPersonController
 
         public bool OnGround()
         {
-            bool b = false;
-            RaycastHit hit = new RaycastHit();
-            for (int i = 0; i < spreadTable.Length; i++)
+            bool raycastHit = false;
+            RaycastHit hitInfo = new RaycastHit();
+            for (int i = 0; !raycastHit && i < spreadTable.Length; i++)
             {
-                b |= Physics.Raycast(
+                raycastHit |= Physics.Raycast(
                         collider.position
                             - Vector3.down * 0.2f
                             + spreadTable[i] * groundCheckSpread,
                         Vector3.down,
-                        out hit,
+                        out hitInfo,
                         groundCheckLength,
                         groundLayer);
             }
 
-            return b;
+            return raycastHit;
         }
 
         void OnDrawGizmosSelected()
