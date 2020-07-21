@@ -6,11 +6,16 @@ namespace ThirdPersonController
     {
         public Animator animator = null;
         public new Rigidbody rigidbody = null;
-        public new Collider collider = null;
+        public new Transform collider = null;
         public new Camera camera = null;
         public Transform model = null;
 
+        [Space]
         [SerializeField] LayerMask groundLayer = new LayerMask();
+        [SerializeField] float groundCheckLength = 0f;
+        [SerializeField] float groundCheckSpread = 0f;
+        private readonly Vector3[] spreadTable =
+            {Vector3.zero, Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
         #region States
         [Space]
@@ -105,15 +110,34 @@ namespace ThirdPersonController
 
         public bool OnGround()
         {
-            return Physics.Raycast(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down, 0.15f, groundLayer) && rigidbody.velocity.y <= 0;
+            bool b = false;
+            RaycastHit hit = new RaycastHit();
+            for (int i = 0; i < spreadTable.Length; i++)
+            {
+                b |= Physics.Raycast(
+                        collider.position
+                            - Vector3.down * 0.2f
+                            + spreadTable[i] * groundCheckSpread,
+                        Vector3.down,
+                        out hit,
+                        groundCheckLength,
+                        groundLayer);
+            }
+
+            return b;
         }
 
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position + new Vector3(0, 0.1f, 0),
-                Vector3.down * 0.15f);
+            for (int i = 0; i < spreadTable.Length; i++)
+            {
+                Gizmos.DrawRay(
+                    collider.transform.position
+                        - Vector3.down * 0.2f
+                        + spreadTable[i] * groundCheckSpread,
+                    Vector3.down * groundCheckLength);
+            }
         }
     }
 }
