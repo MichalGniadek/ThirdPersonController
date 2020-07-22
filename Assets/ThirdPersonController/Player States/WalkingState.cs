@@ -21,6 +21,9 @@ namespace ThirdPersonController
         float minSpeedForSlide = 0f;
         [SerializeField, Tooltip("Force applied when jumping")]
         float jumpForce = 0f;
+        [SerializeField]
+        [Tooltip("How much the character sticks to ground (e.g. when going past the peak of a slope)")]
+        float groundStickiness = 1f;
 
         enum Mode { Walking, Sprinting, Crouching }
         Mode mode = Mode.Walking;
@@ -85,7 +88,7 @@ namespace ThirdPersonController
 
         public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
-            movement.rigidbody.AddForce(-groundCheckHitInfo.normal);
+            movement.rigidbody.AddForce(-groundCheckHitInfo.normal * groundStickiness);
 
             Vector3 groundForward = Vector3.ProjectOnPlane(
                 movement.CameraForward,
