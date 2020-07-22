@@ -108,10 +108,10 @@ namespace ThirdPersonController
             ) * rigidbody.velocity.magnitude;
         }
 
-        public bool OnGround()
+        public bool OnGround(out RaycastHit hitInfo)
         {
             bool raycastHit = false;
-            RaycastHit hitInfo = new RaycastHit();
+            hitInfo = new RaycastHit();
             for (int i = 0; !raycastHit && i < spreadTable.Length; i++)
             {
                 raycastHit |= Physics.Raycast(

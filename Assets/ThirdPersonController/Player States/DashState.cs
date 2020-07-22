@@ -23,7 +23,7 @@ namespace ThirdPersonController
             if (currentTime <= 0)
             {
                 movement.rigidbody.AddForce(downForce * Vector3.down, ForceMode.Impulse);
-                if (movement.OnGround()) return movement.walkingState;
+                if (movement.OnGround(out var hit)) return movement.walkingState;
                 else return movement.inAirState;
             }
             return this;

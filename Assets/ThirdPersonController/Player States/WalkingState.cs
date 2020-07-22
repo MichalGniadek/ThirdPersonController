@@ -25,6 +25,8 @@ namespace ThirdPersonController
         enum Mode { Walking, Sprinting, Crouching }
         Mode mode = Mode.Walking;
 
+        RaycastHit groundCheckHitInfo = new RaycastHit();
+
         float GetMaxSpeed()
         {
             switch (mode)
@@ -37,6 +39,20 @@ namespace ThirdPersonController
 
         public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
+            if (!movement.OnGround(out groundCheckHitInfo))
+            {
+                movement.animator.CrossFade("Fall", 0.5f);
+                return movement.inAirState;
+            }
+            if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
+            if (Input.GetKeyDown(KeyCode.Q)) return movement.rollState;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Jump(jumpForce);
+                return movement.inAirState;
+            }
+
+            // Handle mode changes
             if (Input.GetKey(KeyCode.LeftControl))
             {
                 if (movement.HorizontalVelocity > minSpeedForSlide)
@@ -59,21 +75,6 @@ namespace ThirdPersonController
                 mode = Mode.Walking;
             }
 
-            if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
-            if (Input.GetKeyDown(KeyCode.Q)) return movement.rollState;
-
-            if (!movement.OnGround())
-            {
-                movement.animator.CrossFade("Fall", 0.5f);
-                return movement.inAirState;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Jump(jumpForce);
-                return movement.inAirState;
-            }
-
             movement.animator.SetFloat("WalkingSpeed",
                 Mathf.Min(1f, movement.HorizontalVelocity / sprintSpeed));
 
@@ -84,16 +85,24 @@ namespace ThirdPersonController
 
         public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
-            movement.rigidbody.AddForce(Vector3.down);
+            movement.rigidbody.AddForce(-groundCheckHitInfo.normal);
+
+            Vector3 groundForward = Vector3.ProjectOnPlane(
+                movement.CameraForward,
+                groundCheckHitInfo.normal);
+
+            Vector3 groundRight = Vector3.ProjectOnPlane(
+                movement.CameraRight,
+                groundCheckHitInfo.normal);
 
             HandleMovementInAxis(
                 velocityRelativeToCamera.x, movement.inputDirection.x,
-                movement.CameraForward, GetMaxSpeed(),
+                groundForward, GetMaxSpeed(),
                 horizontalDrag, moveForce);
 
             HandleMovementInAxis(
                 velocityRelativeToCamera.z, movement.inputDirection.z,
-                movement.CameraRight, GetMaxSpeed() * sideMaxSpeedMutliplier,
+                groundRight, GetMaxSpeed() * sideMaxSpeedMutliplier,
                 horizontalDrag, moveForce);
         }
 

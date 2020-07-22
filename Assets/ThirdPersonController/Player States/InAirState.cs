@@ -24,7 +24,7 @@ namespace ThirdPersonController
         public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             // So we don't detect ground immediately after jumping
-            if (movement.TimeSinceStateChange > 0.1f && movement.OnGround())
+            if (movement.TimeSinceStateChange > 0.1f && movement.OnGround(out var hit))
             {
                 movement.animator.CrossFade("Land", 0.1f);
                 return movement.walkingState;
