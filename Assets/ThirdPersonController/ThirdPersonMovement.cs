@@ -13,7 +13,12 @@ namespace ThirdPersonController
         [Space]
         [SerializeField] LayerMask groundLayer = new LayerMask();
         [SerializeField] float groundCheckLength = 0f;
-        [SerializeField] float groundCheckSpread = 0f;
+
+        [Space]
+        [SerializeField] float standCheckLength = 0f;
+
+        [Space]
+        [SerializeField] float checkSpread = 0f;
         private readonly Vector3[] spreadTable =
             {Vector3.zero, Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
@@ -117,7 +122,7 @@ namespace ThirdPersonController
                 raycastHit |= Physics.Raycast(
                         collider.position
                             - Vector3.down * 0.2f
-                            + spreadTable[i] * groundCheckSpread,
+                            + spreadTable[i] * checkSpread,
                         Vector3.down,
                         out hitInfo,
                         groundCheckLength,
@@ -125,6 +130,23 @@ namespace ThirdPersonController
             }
 
             return raycastHit;
+        }
+
+        public bool CanStand()
+        {
+            bool canStand = true;
+            for (int i = 0; canStand && i < spreadTable.Length; i++)
+            {
+                canStand &= !Physics.Raycast(
+                        collider.position
+                            - Vector3.down * 0.2f
+                            + spreadTable[i] * checkSpread,
+                        Vector3.up,
+                        standCheckLength,
+                        groundLayer);
+            }
+
+            return canStand;
         }
 
         void OnDrawGizmosSelected()
@@ -135,8 +157,18 @@ namespace ThirdPersonController
                 Gizmos.DrawRay(
                     collider.transform.position
                         - Vector3.down * 0.2f
-                        + spreadTable[i] * groundCheckSpread,
+                        + spreadTable[i] * checkSpread,
                     Vector3.down * groundCheckLength);
+            }
+
+            Gizmos.color = Color.magenta;
+            for (int i = 0; i < spreadTable.Length; i++)
+            {
+                Gizmos.DrawRay(
+                    collider.position
+                            - Vector3.down * 0.2f
+                            + spreadTable[i] * checkSpread,
+                    Vector3.up * standCheckLength);
             }
         }
     }

@@ -74,19 +74,21 @@ namespace ThirdPersonController
             }
             else
             {
-                SetHeight(1f);
 
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
                     mode = Mode.Sprinting;
+                    SetHeight(1f);
                 }
                 else
                 {
-                    if (mode == Mode.Crouching)
+                    if (mode == Mode.Sprinting) mode = Mode.Walking;
+                    else if (mode == Mode.Crouching && movement.CanStand())
                     {
                         movement.animator.CrossFade("Walk", 0.2f);
+                        SetHeight(1f);
+                        mode = Mode.Walking;
                     }
-                    mode = Mode.Walking;
                 }
             }
 
@@ -123,8 +125,15 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
-            mode = Mode.Walking;
+            if (movement.CanStand()) mode = Mode.Walking;
+            else
+            {
+                mode = Mode.Crouching;
+                movement.animator.CrossFade("Crouch", 0.2f);
+                SetHeight(crouchingHeight);
+            }
         }
+
         protected override void ExitImpl()
         {
             SetHeight(1f);
