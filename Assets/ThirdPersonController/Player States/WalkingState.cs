@@ -24,6 +24,9 @@ namespace ThirdPersonController
         [SerializeField]
         [Tooltip("How much the character sticks to ground (e.g. when going past the peak of a slope)")]
         float groundStickiness = 1f;
+        [SerializeField, Range(0, 1)]
+        [Tooltip("Fraction of full height (y scale) that collider will change to")]
+        float crouchingHeight = 1f;
 
         enum Mode { Walking, Sprinting, Crouching }
         Mode mode = Mode.Walking;
@@ -66,16 +69,25 @@ namespace ThirdPersonController
                 {
                     mode = Mode.Crouching;
                     movement.animator.CrossFade("Crouch", 0.2f);
+                    SetHeight(crouchingHeight);
                 }
             }
-            else if (Input.GetKey(KeyCode.LeftShift)) mode = Mode.Sprinting;
             else
             {
-                if (mode == Mode.Crouching)
+                SetHeight(1f);
+
+                if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    movement.animator.CrossFade("Walk", 0.2f);
+                    mode = Mode.Sprinting;
                 }
-                mode = Mode.Walking;
+                else
+                {
+                    if (mode == Mode.Crouching)
+                    {
+                        movement.animator.CrossFade("Walk", 0.2f);
+                    }
+                    mode = Mode.Walking;
+                }
             }
 
             movement.animator.SetFloat("WalkingSpeed",
@@ -113,6 +125,9 @@ namespace ThirdPersonController
         {
             mode = Mode.Walking;
         }
-        protected override void ExitImpl() { }
+        protected override void ExitImpl()
+        {
+            SetHeight(1f);
+        }
     }
 }

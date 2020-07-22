@@ -94,6 +94,13 @@ namespace ThirdPersonController
             }
         }
 
+        protected void SetHeight(float h)
+        {
+            var scale = movement.collider.localScale;
+            scale.y = h;
+            movement.collider.localScale = scale;
+        }
+
         /// <summary>
         /// Called every update if state is active. Return state FSM should change to.
         /// Return this if you don't want to change state.

@@ -52,12 +52,5 @@ namespace ThirdPersonController
         {
             SetHeight(1f);
         }
-
-        void SetHeight(float h)
-        {
-            var scale = movement.collider.localScale;
-            scale.y = h;
-            movement.collider.localScale = scale;
-        }
     }
 }
