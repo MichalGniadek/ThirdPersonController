@@ -19,6 +19,7 @@ namespace ThirdPersonController
 
         [Space]
         [SerializeField] float checkSpread = 0f;
+        [SerializeField, HideInInspector]
         private readonly Vector3[] spreadTable =
             {Vector3.zero, Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
@@ -113,16 +114,18 @@ namespace ThirdPersonController
             ) * rigidbody.velocity.magnitude;
         }
 
+        private Vector3 BaseRayPosition() => collider.position - Vector3.down * 0.2f;
+
         public bool OnGround(out RaycastHit hitInfo)
         {
             bool raycastHit = false;
             hitInfo = new RaycastHit();
+
+            Vector3 basePos = BaseRayPosition();
             for (int i = 0; !raycastHit && i < spreadTable.Length; i++)
             {
                 raycastHit |= Physics.Raycast(
-                        collider.position
-                            - Vector3.down * 0.2f
-                            + spreadTable[i] * checkSpread,
+                        basePos + spreadTable[i],
                         Vector3.down,
                         out hitInfo,
                         groundCheckLength,
@@ -135,12 +138,12 @@ namespace ThirdPersonController
         public bool CanStand()
         {
             bool canStand = true;
+
+            Vector3 basePos = BaseRayPosition();
             for (int i = 0; canStand && i < spreadTable.Length; i++)
             {
                 canStand &= !Physics.Raycast(
-                        collider.position
-                            - Vector3.down * 0.2f
-                            + spreadTable[i] * checkSpread,
+                        basePos + spreadTable[i],
                         Vector3.up,
                         standCheckLength,
                         groundLayer);
@@ -151,13 +154,13 @@ namespace ThirdPersonController
 
         void OnDrawGizmosSelected()
         {
+            Vector3 basePos = BaseRayPosition();
+
             Gizmos.color = Color.red;
             for (int i = 0; i < spreadTable.Length; i++)
             {
                 Gizmos.DrawRay(
-                    collider.transform.position
-                        - Vector3.down * 0.2f
-                        + spreadTable[i] * checkSpread,
+                    basePos + spreadTable[i],
                     Vector3.down * groundCheckLength);
             }
 
@@ -165,11 +168,18 @@ namespace ThirdPersonController
             for (int i = 0; i < spreadTable.Length; i++)
             {
                 Gizmos.DrawRay(
-                    collider.position
-                            - Vector3.down * 0.2f
-                            + spreadTable[i] * checkSpread,
+                    basePos + spreadTable[i],
                     Vector3.up * standCheckLength);
             }
+        }
+
+        void OnValidate()
+        {
+            spreadTable[0] = Vector3.zero;
+            spreadTable[1] = Vector3.forward * checkSpread;
+            spreadTable[2] = Vector3.right * checkSpread;
+            spreadTable[3] = Vector3.back * checkSpread;
+            spreadTable[4] = Vector3.left * checkSpread;
         }
     }
 }
