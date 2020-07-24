@@ -20,7 +20,7 @@ namespace ThirdPersonController
         float currentTime = 0f;
         Vector3 rollDirection;
 
-        public override PlayerState Process(Vector3 inputWorldDirection)
+        public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             currentTime -= Time.deltaTime;
             if (currentTime <= 0) return movement.walkingState;
@@ -30,7 +30,7 @@ namespace ThirdPersonController
             return this;
         }
 
-        public override void FixedProcess(Vector3 inputWorldDirection)
+        public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
             movement.rigidbody.AddForce(rollDirection * sustainedForce);
         }
