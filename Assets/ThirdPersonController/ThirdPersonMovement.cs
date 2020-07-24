@@ -23,6 +23,11 @@ namespace ThirdPersonController
         private readonly Vector3[] spreadTable =
             {Vector3.zero, Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
+        [Space]
+        [SerializeField] float wallCheckLength = 0f;
+        [SerializeField] float wallCheckYOffset = 0f;
+        RaycastHit previousWallHitInfo = new RaycastHit();
+
         #region States
         [Space]
         public WalkingState walkingState = new WalkingState();
@@ -30,6 +35,7 @@ namespace ThirdPersonController
         public DashState dashState = new DashState();
         public RollState rollState = new RollState();
         public SlideState slideState = new SlideState();
+        public WallRunningState wallRunningState = new WallRunningState();
         #endregion
 
         float timeSinceStateChange = 0f;
@@ -38,9 +44,6 @@ namespace ThirdPersonController
         PlayerState currentState;
 
         [HideInInspector] public Vector3 inputWorldDirection = new Vector3();
-
-        [HideInInspector] public bool isSprinting = false;
-        [HideInInspector] public bool isJumping = false;
 
         public float HorizontalVelocity => rigidbody.velocity.Horizontal().magnitude;
 
@@ -59,6 +62,7 @@ namespace ThirdPersonController
             dashState.movement = this;
             rollState.movement = this;
             slideState.movement = this;
+            wallRunningState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
@@ -92,6 +96,7 @@ namespace ThirdPersonController
             {
                 timeSinceStateChange += Time.deltaTime;
             }
+            //Debug.Log(currentState);
         }
 
         void FixedUpdate()
@@ -114,14 +119,14 @@ namespace ThirdPersonController
             ) * rigidbody.velocity.magnitude;
         }
 
-        private Vector3 BaseRayPosition() => collider.position - Vector3.down * 0.2f;
+        private Vector3 OffsetPosition(float y) => collider.position - Vector3.down * y;
 
         public bool OnGround(out RaycastHit hitInfo)
         {
             bool raycastHit = false;
             hitInfo = new RaycastHit();
 
-            Vector3 basePos = BaseRayPosition();
+            Vector3 basePos = OffsetPosition(0.2f);
             for (int i = 0; !raycastHit && i < spreadTable.Length; i++)
             {
                 raycastHit |= Physics.Raycast(
@@ -139,7 +144,7 @@ namespace ThirdPersonController
         {
             bool canStand = true;
 
-            Vector3 basePos = BaseRayPosition();
+            Vector3 basePos = OffsetPosition(0.2f);
             for (int i = 0; canStand && i < spreadTable.Length; i++)
             {
                 canStand &= !Physics.Raycast(
@@ -152,15 +157,64 @@ namespace ThirdPersonController
             return canStand;
         }
 
+        public bool IsNearValidWall(out RaycastHit wallHitInfo, bool canBeTheSameWall = true)
+        {
+            Vector3 basePos = OffsetPosition(wallCheckYOffset);
+
+            Physics.Raycast(basePos, transform.right, out var rightHitInfo,
+                wallCheckLength, groundLayer);
+            Physics.Raycast(basePos, -transform.right, out var leftHitInfo,
+                wallCheckLength, groundLayer);
+
+            bool right_wall_viable = rightHitInfo.collider != null &&
+                (canBeTheSameWall ||
+                rightHitInfo.normal != previousWallHitInfo.normal ||
+                rightHitInfo.collider != previousWallHitInfo.collider);
+
+            bool left_wall_viable = leftHitInfo.collider != null &&
+                (canBeTheSameWall ||
+                leftHitInfo.normal != previousWallHitInfo.normal ||
+                leftHitInfo.collider != previousWallHitInfo.collider);
+
+
+            if (right_wall_viable && !left_wall_viable)
+            {
+                wallHitInfo = rightHitInfo;
+            }
+            else if (!right_wall_viable && left_wall_viable)
+            {
+                wallHitInfo = leftHitInfo;
+            }
+            else if (right_wall_viable && left_wall_viable)
+            {
+                if (rightHitInfo.distance < leftHitInfo.distance)
+                {
+                    wallHitInfo = rightHitInfo;
+                }
+                else
+                {
+                    wallHitInfo = leftHitInfo;
+                }
+            }
+            else//both not viable
+            {
+                wallHitInfo = new RaycastHit();
+                return false;
+            }
+
+            previousWallHitInfo = wallHitInfo;
+            return true;
+        }
+
         void OnDrawGizmosSelected()
         {
-            Vector3 basePos = BaseRayPosition();
+            Vector3 verticalBasePos = OffsetPosition(0.2f);
 
             Gizmos.color = Color.red;
             for (int i = 0; i < spreadTable.Length; i++)
             {
                 Gizmos.DrawRay(
-                    basePos + spreadTable[i],
+                    verticalBasePos + spreadTable[i],
                     Vector3.down * groundCheckLength);
             }
 
@@ -168,9 +222,13 @@ namespace ThirdPersonController
             for (int i = 0; i < spreadTable.Length; i++)
             {
                 Gizmos.DrawRay(
-                    basePos + spreadTable[i],
+                    verticalBasePos + spreadTable[i],
                     Vector3.up * standCheckLength);
             }
+
+            Vector3 wallCheckBasePos = OffsetPosition(wallCheckYOffset);
+            Gizmos.DrawRay(wallCheckBasePos, transform.right * wallCheckLength);
+            Gizmos.DrawRay(wallCheckBasePos, -transform.right * wallCheckLength);
         }
 
         void OnValidate()
