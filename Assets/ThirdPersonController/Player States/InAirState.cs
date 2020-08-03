@@ -35,6 +35,9 @@ namespace ThirdPersonController
             if (Input.GetButton("Jump") && movement.IsNearValidWall(out var hitInfo))
                 return movement.wallRunningState;
 
+            if (movement.NearLadder && Input.GetKey(KeyCode.F))
+                return movement.ladderClimbingState;
+
             if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
             {
                 currentAirJumps--;

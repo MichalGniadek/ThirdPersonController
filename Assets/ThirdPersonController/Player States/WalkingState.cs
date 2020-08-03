@@ -57,6 +57,8 @@ namespace ThirdPersonController
                 Jump(jumpForce);
                 return movement.inAirState;
             }
+            if (movement.NearLadder && Input.GetKey(KeyCode.F))
+                return movement.ladderClimbingState;
 
             // Handle mode changes
             if (Input.GetKey(KeyCode.LeftControl))

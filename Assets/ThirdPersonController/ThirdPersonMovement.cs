@@ -28,6 +28,8 @@ namespace ThirdPersonController
         [SerializeField] float wallCheckYOffset = 0f;
         RaycastHit previousWallHitInfo = new RaycastHit();
 
+        [Space]
+
         #region States
         [Space]
         public WalkingState walkingState = new WalkingState();
@@ -36,6 +38,7 @@ namespace ThirdPersonController
         public RollState rollState = new RollState();
         public SlideState slideState = new SlideState();
         public WallRunningState wallRunningState = new WallRunningState();
+        public LadderClimbingState ladderClimbingState = new LadderClimbingState();
         #endregion
 
         float timeSinceStateChange = 0f;
@@ -55,6 +58,9 @@ namespace ThirdPersonController
 
         [HideInInspector] public Vector3 inputDirection = new Vector3();
 
+        [HideInInspector] public LadderScript currentLadder = null;
+        public bool NearLadder => currentLadder != null;
+
         void Awake()
         {
             walkingState.movement = this;
@@ -63,6 +69,7 @@ namespace ThirdPersonController
             rollState.movement = this;
             slideState.movement = this;
             wallRunningState.movement = this;
+            ladderClimbingState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
@@ -204,6 +211,18 @@ namespace ThirdPersonController
 
             previousWallHitInfo = wallHitInfo;
             return true;
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.TryGetComponent<LadderScript>(out var l))
+                currentLadder = l;
+        }
+
+        void OnTriggerExit(Collider other)
+        {
+            if (other.TryGetComponent<LadderScript>(out var l))
+                currentLadder = null;
         }
 
         void OnDrawGizmosSelected()
