@@ -168,9 +168,9 @@ namespace ThirdPersonController
         {
             Vector3 basePos = OffsetPosition(wallCheckYOffset);
 
-            Physics.Raycast(basePos, transform.right, out var rightHitInfo,
+            Physics.Raycast(basePos, model.right, out var rightHitInfo,
                 wallCheckLength, groundLayer);
-            Physics.Raycast(basePos, -transform.right, out var leftHitInfo,
+            Physics.Raycast(basePos, -model.right, out var leftHitInfo,
                 wallCheckLength, groundLayer);
 
             bool right_wall_viable = rightHitInfo.collider != null &&
@@ -246,8 +246,8 @@ namespace ThirdPersonController
             }
 
             Vector3 wallCheckBasePos = OffsetPosition(wallCheckYOffset);
-            Gizmos.DrawRay(wallCheckBasePos, transform.right * wallCheckLength);
-            Gizmos.DrawRay(wallCheckBasePos, -transform.right * wallCheckLength);
+            Gizmos.DrawRay(wallCheckBasePos, model.right * wallCheckLength);
+            Gizmos.DrawRay(wallCheckBasePos, -model.right * wallCheckLength);
         }
 
         void OnValidate()
