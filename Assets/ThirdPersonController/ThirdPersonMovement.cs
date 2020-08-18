@@ -26,7 +26,6 @@ namespace ThirdPersonController
         [Space]
         [SerializeField] float wallCheckLength = 0f;
         [SerializeField] float wallCheckYOffset = 0f;
-        RaycastHit previousWallHitInfo = new RaycastHit();
 
         [Space]
 
@@ -45,6 +44,7 @@ namespace ThirdPersonController
         public float TimeSinceStateChange => timeSinceStateChange;
 
         PlayerState currentState;
+        public PlayerState nextState { private set; get; } = null;
 
         [HideInInspector] public Vector3 inputWorldDirection = new Vector3();
 
@@ -90,11 +90,11 @@ namespace ThirdPersonController
                 camera.transform.forward.Horizontal() * inputDirection.y +
                 camera.transform.right * inputDirection.x;
 
-            var newState = currentState.Process(inputWorldDirection);
-            if (newState != currentState)
+            nextState = currentState.Process(inputWorldDirection);
+            if (nextState != currentState)
             {
                 currentState.Exit();
-                currentState = newState;
+                currentState = nextState;
                 currentState.Enter();
 
                 timeSinceStateChange = 0f;
@@ -164,43 +164,40 @@ namespace ThirdPersonController
             return canStand;
         }
 
-        public bool IsNearValidWall(out RaycastHit wallHitInfo, bool canBeTheSameWall = true)
+        public bool IsNearValidWall(out RaycastHit wallHitInfo, bool frontBack = false)
         {
             Vector3 basePos = OffsetPosition(wallCheckYOffset);
 
-            Physics.Raycast(basePos, model.right, out var rightHitInfo,
+            Vector3 raycastDirection;
+            if (frontBack) raycastDirection = model.forward;
+            else raycastDirection = model.right;
+
+            Physics.Raycast(basePos, raycastDirection, out var hitInfo1,
                 wallCheckLength, groundLayer);
-            Physics.Raycast(basePos, -model.right, out var leftHitInfo,
+            Physics.Raycast(basePos, -raycastDirection, out var hitInfo2,
                 wallCheckLength, groundLayer);
 
-            bool right_wall_viable = rightHitInfo.collider != null &&
-                (canBeTheSameWall ||
-                rightHitInfo.normal != previousWallHitInfo.normal ||
-                rightHitInfo.collider != previousWallHitInfo.collider);
-
-            bool left_wall_viable = leftHitInfo.collider != null &&
-                (canBeTheSameWall ||
-                leftHitInfo.normal != previousWallHitInfo.normal ||
-                leftHitInfo.collider != previousWallHitInfo.collider);
+            bool right_wall_viable = hitInfo1.collider != null;
+            bool left_wall_viable = hitInfo2.collider != null;
 
 
             if (right_wall_viable && !left_wall_viable)
             {
-                wallHitInfo = rightHitInfo;
+                wallHitInfo = hitInfo1;
             }
             else if (!right_wall_viable && left_wall_viable)
             {
-                wallHitInfo = leftHitInfo;
+                wallHitInfo = hitInfo2;
             }
             else if (right_wall_viable && left_wall_viable)
             {
-                if (rightHitInfo.distance < leftHitInfo.distance)
+                if (hitInfo1.distance < hitInfo2.distance)
                 {
-                    wallHitInfo = rightHitInfo;
+                    wallHitInfo = hitInfo1;
                 }
                 else
                 {
-                    wallHitInfo = leftHitInfo;
+                    wallHitInfo = hitInfo2;
                 }
             }
             else//both not viable
@@ -209,7 +206,6 @@ namespace ThirdPersonController
                 return false;
             }
 
-            previousWallHitInfo = wallHitInfo;
             return true;
         }
 

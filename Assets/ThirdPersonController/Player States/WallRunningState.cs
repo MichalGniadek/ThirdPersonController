@@ -20,15 +20,22 @@ namespace ThirdPersonController
         RaycastHit wallHitInfo = new RaycastHit();
         Vector3 wallDirection = new Vector3();
 
+        public bool JumpedFromTheWall { private set; get; } = false;
+
         public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             if (movement.OnGround(out var hitInfo)) return movement.walkingState;
 
-            if (Input.GetKeyUp(KeyCode.Space) ||
-                !movement.IsNearValidWall(out wallHitInfo, canBeTheSameWall: true))
+            if (Input.GetMouseButtonUp(1) ||
+                !movement.IsNearValidWall(out wallHitInfo))
             {
-                Jump(verticalJumpForce);
-                movement.rigidbody.AddForce(wallHitInfo.normal * horizontalJumpForce);
+                return movement.inAirState;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                JumpedFromTheWall = true;
+                WallJump(wallHitInfo.normal);
                 return movement.inAirState;
             }
 
@@ -49,6 +56,8 @@ namespace ThirdPersonController
 
         protected override void EnterImpl()
         {
+            JumpedFromTheWall = false;
+
             Vector3 vel = movement.rigidbody.velocity;
             vel.y = Mathf.Clamp(vel.y, -maxVerticalVelocity, maxVerticalVelocity);
             movement.rigidbody.velocity = vel;
@@ -56,6 +65,17 @@ namespace ThirdPersonController
 
         protected override void ExitImpl()
         {
+        }
+
+        public void ResetJumpedFromTheWall()
+        {
+            JumpedFromTheWall = false;
+        }
+
+        public void WallJump(Vector3 wallNormal)
+        {
+            Jump(verticalJumpForce);
+            movement.rigidbody.AddForce(wallNormal * horizontalJumpForce);
         }
     }
 }

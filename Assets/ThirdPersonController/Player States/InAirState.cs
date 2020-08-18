@@ -21,6 +21,8 @@ namespace ThirdPersonController
 
         int currentAirJumps = 0;
 
+        RaycastHit lastWall = new RaycastHit();
+
         public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             // So we don't detect ground immediately after jumping
@@ -32,17 +34,44 @@ namespace ThirdPersonController
 
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
-            if (Input.GetButton("Jump") && movement.IsNearValidWall(out var hitInfo))
-                return movement.wallRunningState;
+            RaycastHit hitInfo;
+            bool alreadyJumpedThisFrame = false;
 
-            if (movement.NearLadder && Input.GetKey(KeyCode.F))
-                return movement.ladderClimbingState;
+            if (movement.IsNearValidWall(out hitInfo))
+            {
+                if (Input.GetMouseButton(1) && !movement.wallRunningState.JumpedFromTheWall)
+                {
+                    return movement.wallRunningState;
+                }
+                else if (Input.GetKeyDown(KeyCode.Space) &&
+                            hitInfo.collider != lastWall.collider)
+                {
+                    lastWall = hitInfo;
+                    alreadyJumpedThisFrame = true;
+                    movement.wallRunningState.WallJump(hitInfo.normal);
+                }
+            }
+            else if (movement.IsNearValidWall(out hitInfo, frontBack: true))
+            {
+                if (Input.GetKeyDown(KeyCode.Space) &&
+                            hitInfo.collider != lastWall.collider)
+                {
+                    lastWall = hitInfo;
+                    alreadyJumpedThisFrame = true;
+                    movement.wallRunningState.WallJump(hitInfo.normal);
+                }
+            }
 
-            if (currentAirJumps > 0 && Input.GetKeyDown(KeyCode.Space))
+            movement.wallRunningState.ResetJumpedFromTheWall();
+            if (!alreadyJumpedThisFrame && currentAirJumps > 0 &&
+                Input.GetKeyDown(KeyCode.Space))
             {
                 currentAirJumps--;
                 Jump(airJumpForce);
             }
+
+            if (movement.NearLadder && Input.GetKey(KeyCode.F))
+                return movement.ladderClimbingState;
 
             if (movement.inputDirection.magnitude > 0.1f)
                 HandleRotation();
@@ -69,6 +98,11 @@ namespace ThirdPersonController
             currentAirJumps = numberOfAirJumps;
         }
 
-        protected override void ExitImpl() { }
+        protected override void ExitImpl()
+        {
+            movement.wallRunningState.ResetJumpedFromTheWall();
+            if (movement.nextState != movement.wallRunningState)
+                lastWall = new RaycastHit();
+        }
     }
 }
