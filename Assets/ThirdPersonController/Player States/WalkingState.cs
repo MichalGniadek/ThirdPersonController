@@ -43,7 +43,7 @@ namespace ThirdPersonController
             }
         }
 
-        public override PlayerState Process(Vector3 velocityRelativeToCamera)
+        public override PlayerState Process(Vector3 inputWorldDirection)
         {
             if (!movement.OnGround(out groundCheckHitInfo))
             {

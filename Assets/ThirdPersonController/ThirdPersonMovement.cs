@@ -34,6 +34,7 @@ namespace ThirdPersonController
         [SerializeField] float ledgeCheckLength = 0f;
         [SerializeField] float freeHangUpOffset = 0f;
         [SerializeField] float freeHangLength = 0f;
+        [SerializeField] float ledgeCheckSideSpread = 0f;
 
         #region States
         [Space]
@@ -44,7 +45,7 @@ namespace ThirdPersonController
         public SlideState slideState = new SlideState();
         public WallRunningState wallRunningState = new WallRunningState();
         public LadderClimbingState ladderClimbingState = new LadderClimbingState();
-        public LadgeClimbingState ledgeCimbingState = new LadgeClimbingState();
+        public LedgeClimbingState ledgeCimbingState = new LedgeClimbingState();
         #endregion
 
         float timeSinceStateChange = 0f;
@@ -216,24 +217,56 @@ namespace ThirdPersonController
             return true;
         }
 
+        public struct LedgeInfo
+        {
+            public RaycastHit verticalInfo;
+            public RaycastHit horizontalInfo;
+            public bool freeHang;
+            public bool right;
+            public bool left;
+        }
 
-        public bool CheckLedge(out RaycastHit hitInfo)
+        public bool CheckLedge(out LedgeInfo ledgeInfo)
         {
             Vector3 ledgeCheckPosition =
                     YOffsetPosition(ledgeCheckUpOffset) +
                     model.forward * ledgeCheckForwardOffset;
 
-            return Physics.Raycast(ledgeCheckPosition,
+            bool b = Physics.Raycast(ledgeCheckPosition,
                                         Vector3.down,
-                                        out hitInfo,
+                                        out ledgeInfo.verticalInfo,
                                         ledgeCheckLength,
                                         groundLayer);
-        }
 
-        public bool CheckFreeHang() =>
-            Physics.Raycast(YOffsetPosition(freeHangUpOffset),
-                            model.forward,
-                            freeHangLength);
+            Vector3 horizontalCheckPostion = transform.position;
+            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y;
+
+            b &= Physics.Raycast(horizontalCheckPostion,
+                                 model.forward,
+                                 out ledgeInfo.horizontalInfo,
+                                 ledgeCheckForwardOffset,
+                                 groundLayer);
+
+            ledgeInfo.freeHang = !Physics.Raycast(YOffsetPosition(freeHangUpOffset),
+                                                    model.forward,
+                                                    freeHangLength);
+
+            ledgeInfo.right = Physics.Raycast(
+                horizontalCheckPostion + model.transform.right * ledgeCheckSideSpread,
+                model.forward,
+                out ledgeInfo.horizontalInfo,
+                ledgeCheckForwardOffset,
+                groundLayer);
+
+            ledgeInfo.left = Physics.Raycast(
+                horizontalCheckPostion - model.transform.right * ledgeCheckSideSpread,
+                model.forward,
+                out ledgeInfo.horizontalInfo,
+                ledgeCheckForwardOffset,
+                groundLayer);
+
+            return b;
+        }
 
         void OnTriggerEnter(Collider other)
         {

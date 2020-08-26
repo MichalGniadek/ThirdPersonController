@@ -34,6 +34,12 @@ namespace ThirdPersonController
 
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
+            if (movement.CheckLedge(out var ledgeInfo) &&
+                Input.GetKey(KeyCode.LeftShift))
+            {
+                return movement.ledgeCimbingState;
+            }
+
             RaycastHit hitInfo;
             bool alreadyJumpedThisFrame = false;
 
