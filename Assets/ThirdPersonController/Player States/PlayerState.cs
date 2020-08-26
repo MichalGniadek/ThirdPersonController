@@ -75,7 +75,7 @@ namespace ThirdPersonController
 
         protected void HandleRotation()
         {
-            Vector3 horizontalVelocity = movement.rigidbody.velocity.Horizontal();
+            Vector3 horizontalVelocity = movement.inputWorldDirection;
             if (horizontalVelocity.magnitude > 0.1f)
             {
                 float targetAngle = Mathf.Rad2Deg * Mathf.Atan2(
@@ -105,7 +105,7 @@ namespace ThirdPersonController
         /// Called every update if state is active. Return state FSM should change to.
         /// Return this if you don't want to change state.
         /// </summary>
-        public abstract PlayerState Process(Vector3 velocityRelativeToCamera);
+        public abstract PlayerState Process(Vector3 inputWorldDirection);
         public abstract void FixedProcess(Vector3 velocityRelativeToCamera);
         protected abstract void EnterImpl();
         protected abstract void ExitImpl();

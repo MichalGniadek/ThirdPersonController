@@ -2,6 +2,7 @@
 
 namespace ThirdPersonController
 {
+    [SelectionBase]
     public class ThirdPersonMovement : MonoBehaviour
     {
         public Animator animator = null;
@@ -28,6 +29,11 @@ namespace ThirdPersonController
         [SerializeField] float wallCheckYOffset = 0f;
 
         [Space]
+        [SerializeField] float ledgeCheckForwardOffset = 0f;
+        [SerializeField] float ledgeCheckUpOffset = 0f;
+        [SerializeField] float ledgeCheckLength = 0f;
+        [SerializeField] float freeHangUpOffset = 0f;
+        [SerializeField] float freeHangLength = 0f;
 
         #region States
         [Space]
@@ -38,6 +44,7 @@ namespace ThirdPersonController
         public SlideState slideState = new SlideState();
         public WallRunningState wallRunningState = new WallRunningState();
         public LadderClimbingState ladderClimbingState = new LadderClimbingState();
+        public LadgeClimbingState ledgeCimbingState = new LadgeClimbingState();
         #endregion
 
         float timeSinceStateChange = 0f;
@@ -70,6 +77,7 @@ namespace ThirdPersonController
             slideState.movement = this;
             wallRunningState.movement = this;
             ladderClimbingState.movement = this;
+            ledgeCimbingState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
@@ -87,8 +95,8 @@ namespace ThirdPersonController
             ).normalized;
 
             inputWorldDirection =
-                camera.transform.forward.Horizontal() * inputDirection.y +
-                camera.transform.right * inputDirection.x;
+                camera.transform.forward.Horizontal() * inputDirection.x +
+                camera.transform.right.Horizontal() * inputDirection.z;
 
             nextState = currentState.Process(inputWorldDirection);
             if (nextState != currentState)
@@ -126,14 +134,14 @@ namespace ThirdPersonController
             ) * rigidbody.velocity.magnitude;
         }
 
-        private Vector3 OffsetPosition(float y) => collider.position - Vector3.down * y;
+        private Vector3 YOffsetPosition(float y) => collider.position + Vector3.up * y;
 
         public bool OnGround(out RaycastHit hitInfo)
         {
             bool raycastHit = false;
             hitInfo = new RaycastHit();
 
-            Vector3 basePos = OffsetPosition(0.2f);
+            Vector3 basePos = YOffsetPosition(0.2f);
             for (int i = 0; !raycastHit && i < spreadTable.Length; i++)
             {
                 raycastHit |= Physics.Raycast(
@@ -151,7 +159,7 @@ namespace ThirdPersonController
         {
             bool canStand = true;
 
-            Vector3 basePos = OffsetPosition(0.2f);
+            Vector3 basePos = YOffsetPosition(0.2f);
             for (int i = 0; canStand && i < spreadTable.Length; i++)
             {
                 canStand &= !Physics.Raycast(
@@ -166,7 +174,7 @@ namespace ThirdPersonController
 
         public bool IsNearValidWall(out RaycastHit wallHitInfo, bool frontBack = false)
         {
-            Vector3 basePos = OffsetPosition(wallCheckYOffset);
+            Vector3 basePos = YOffsetPosition(wallCheckYOffset);
 
             Vector3 raycastDirection;
             if (frontBack) raycastDirection = model.forward;
@@ -179,7 +187,6 @@ namespace ThirdPersonController
 
             bool right_wall_viable = hitInfo1.collider != null;
             bool left_wall_viable = hitInfo2.collider != null;
-
 
             if (right_wall_viable && !left_wall_viable)
             {
@@ -209,6 +216,25 @@ namespace ThirdPersonController
             return true;
         }
 
+
+        public bool CheckLedge(out RaycastHit hitInfo)
+        {
+            Vector3 ledgeCheckPosition =
+                    YOffsetPosition(ledgeCheckUpOffset) +
+                    model.forward * ledgeCheckForwardOffset;
+
+            return Physics.Raycast(ledgeCheckPosition,
+                                        Vector3.down,
+                                        out hitInfo,
+                                        ledgeCheckLength,
+                                        groundLayer);
+        }
+
+        public bool CheckFreeHang() =>
+            Physics.Raycast(YOffsetPosition(freeHangUpOffset),
+                            model.forward,
+                            freeHangLength);
+
         void OnTriggerEnter(Collider other)
         {
             if (other.TryGetComponent<LadderScript>(out var l))
@@ -223,7 +249,7 @@ namespace ThirdPersonController
 
         void OnDrawGizmosSelected()
         {
-            Vector3 verticalBasePos = OffsetPosition(0.2f);
+            Vector3 verticalBasePos = YOffsetPosition(0.2f);
 
             Gizmos.color = Color.red;
             for (int i = 0; i < spreadTable.Length; i++)
@@ -241,9 +267,18 @@ namespace ThirdPersonController
                     Vector3.up * standCheckLength);
             }
 
-            Vector3 wallCheckBasePos = OffsetPosition(wallCheckYOffset);
+            Vector3 wallCheckBasePos = YOffsetPosition(wallCheckYOffset);
             Gizmos.DrawRay(wallCheckBasePos, model.right * wallCheckLength);
             Gizmos.DrawRay(wallCheckBasePos, -model.right * wallCheckLength);
+
+            Gizmos.color = Color.blue;
+            Vector3 ledgeCheckPosition =
+                YOffsetPosition(ledgeCheckUpOffset) +
+                model.forward * ledgeCheckForwardOffset;
+
+            Gizmos.DrawRay(ledgeCheckPosition, Vector3.down * ledgeCheckLength);
+            Gizmos.DrawRay(YOffsetPosition(freeHangUpOffset),
+                model.forward * freeHangLength);
         }
 
         void OnValidate()
