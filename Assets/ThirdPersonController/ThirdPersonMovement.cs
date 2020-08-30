@@ -239,7 +239,7 @@ namespace ThirdPersonController
                                         groundLayer);
 
             Vector3 horizontalCheckPostion = transform.position;
-            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y;
+            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y - 0.1f;
 
             b &= Physics.Raycast(horizontalCheckPostion,
                                  model.forward,
