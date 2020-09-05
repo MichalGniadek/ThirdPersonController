@@ -16,14 +16,14 @@ namespace ThirdPersonController
 
         public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Jump(jumpForce);
-                return movement.inAirState;
-            }
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 movement.animator.CrossFade("Fall", 0.1f);
+                return movement.inAirState;
+            }
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Jump(jumpForce);
                 return movement.inAirState;
             }
 

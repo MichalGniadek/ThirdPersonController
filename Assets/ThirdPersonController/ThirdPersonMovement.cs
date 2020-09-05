@@ -51,6 +51,7 @@ namespace ThirdPersonController
         float timeSinceStateChange = 0f;
         public float TimeSinceStateChange => timeSinceStateChange;
 
+        public PlayerState previousState { private set; get; } = null;
         PlayerState currentState;
         public PlayerState nextState { private set; get; } = null;
 
@@ -103,6 +104,7 @@ namespace ThirdPersonController
             if (nextState != currentState)
             {
                 currentState.Exit();
+                previousState = currentState;
                 currentState = nextState;
                 currentState.Enter();
 
@@ -119,6 +121,9 @@ namespace ThirdPersonController
         {
             currentState.FixedProcess(GetVelocityRelativeToCamera());
         }
+
+        public bool CouldReturnToState(PlayerState state) =>
+            previousState != state || timeSinceStateChange > 0.1f;
 
         Vector3 GetVelocityRelativeToCamera()
         {
@@ -239,7 +244,7 @@ namespace ThirdPersonController
                                         groundLayer);
 
             Vector3 horizontalCheckPostion = transform.position;
-            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y - 0.1f;
+            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y;
 
             b &= Physics.Raycast(horizontalCheckPostion,
                                  model.forward,
@@ -254,14 +259,14 @@ namespace ThirdPersonController
             ledgeInfo.right = Physics.Raycast(
                 horizontalCheckPostion + model.transform.right * ledgeCheckSideSpread,
                 model.forward,
-                out ledgeInfo.horizontalInfo,
+                out var rightInfo,
                 ledgeCheckForwardOffset,
                 groundLayer);
 
             ledgeInfo.left = Physics.Raycast(
                 horizontalCheckPostion - model.transform.right * ledgeCheckSideSpread,
                 model.forward,
-                out ledgeInfo.horizontalInfo,
+                out var leftInfo,
                 ledgeCheckForwardOffset,
                 groundLayer);
 
