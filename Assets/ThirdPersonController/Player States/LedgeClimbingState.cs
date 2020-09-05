@@ -28,6 +28,7 @@ namespace ThirdPersonController
             }
 
             movement.CheckLedge(out ledgeInfo);
+            HandleRotationAndPosition(immediate: false);
 
             if ((movement.inputDirection.z > 0 && ledgeInfo.right) ||
                (movement.inputDirection.z < 0 && ledgeInfo.left))
@@ -48,8 +49,6 @@ namespace ThirdPersonController
                                        Time.deltaTime);
             }
 
-            HandleFreeHangOffset(immediate: false);
-
             movement.animator.SetFloat("Ledge Climb Is Hang",
                                        ledgeInfo.freeHang ? 1 : 0,
                                        0.5f,
@@ -67,16 +66,7 @@ namespace ThirdPersonController
             movement.rigidbody.velocity = new Vector3();
             movement.CheckLedge(out ledgeInfo);
 
-            movement.transform.position =
-                ledgeInfo.horizontalInfo.point - GrabOffset(bracedGrabOffset);
-
-            HandleFreeHangOffset(immediate: true);
-
-            movement.model.rotation =
-                Quaternion.LookRotation(-ledgeInfo.horizontalInfo.normal, Vector3.up);
-
-            wallDirection =
-                Vector3.Cross(ledgeInfo.horizontalInfo.normal, Vector3.up).normalized;
+            HandleRotationAndPosition(immediate: true);
 
             movement.animator.CrossFade("Ledge Climb", 0.1f);
             movement.animator.SetFloat("Ledge Climb Is Hang", ledgeInfo.freeHang ? 1 : 0);
@@ -87,19 +77,37 @@ namespace ThirdPersonController
             movement.model.transform.localPosition = new Vector3();
         }
 
-        void HandleFreeHangOffset(bool immediate)
+        void HandleRotationAndPosition(bool immediate)
         {
-            float delta = immediate ?
-                        1000f : GrabOffset(hangGrabOffset).magnitude * Time.deltaTime;
+            // Set position
+            movement.transform.position =
+                    ledgeInfo.horizontalInfo.point - GrabOffset(bracedGrabOffset);
 
-            Vector3 pos = movement.model.transform.localPosition;
-            pos = Vector3.MoveTowards(
-                        pos,
-                        (ledgeInfo.freeHang ?
-                            -GrabOffset(hangGrabOffset) :
-                            new Vector3()),
-                        delta);
-            movement.model.transform.localPosition = pos;
+            // Set local position depending on free hang
+            Vector3 targetLocalPos =
+                ledgeInfo.freeHang ? -GrabOffset(hangGrabOffset) : new Vector3();
+
+            if (immediate) movement.model.localPosition = targetLocalPos;
+            else movement.model.localPosition = Vector3.MoveTowards(
+                                movement.model.localPosition,
+                                targetLocalPos,
+                                GrabOffset(hangGrabOffset).magnitude * Time.deltaTime
+                            );
+
+            // Set rotation
+            Quaternion targetRotation =
+                Quaternion.LookRotation(-ledgeInfo.GetAverageNormal(), Vector3.up);
+
+            if (immediate) movement.model.rotation = targetRotation;
+            else movement.model.rotation = Quaternion.RotateTowards(
+                                                    movement.model.rotation,
+                                                    targetRotation,
+                                                    90f * Time.deltaTime
+                                                );
+
+            // Set wall direction
+            wallDirection =
+                Vector3.Cross(ledgeInfo.horizontalInfo.normal, Vector3.up).normalized;
         }
 
         Vector3 GrabOffset(Vector2 vec) =>

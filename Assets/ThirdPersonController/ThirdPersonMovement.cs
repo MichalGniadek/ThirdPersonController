@@ -226,9 +226,28 @@ namespace ThirdPersonController
         {
             public RaycastHit verticalInfo;
             public RaycastHit horizontalInfo;
+            public RaycastHit rightInfo;
+            public RaycastHit leftInfo;
             public bool freeHang;
             public bool right;
             public bool left;
+
+            public Vector3 GetAverageNormal()
+            {
+                Vector3 average = horizontalInfo.normal;
+                int i = 0;
+                if (right)
+                {
+                    average += rightInfo.normal;
+                    i++;
+                }
+                if (left)
+                {
+                    average += leftInfo.normal;
+                    i++;
+                }
+                return average / i;
+            }
         }
 
         public bool CheckLedge(out LedgeInfo ledgeInfo)
@@ -244,30 +263,33 @@ namespace ThirdPersonController
                                         groundLayer);
 
             Vector3 horizontalCheckPostion = transform.position;
-            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y;
+            horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y - 0.1f;
 
             b &= Physics.Raycast(horizontalCheckPostion,
                                  model.forward,
                                  out ledgeInfo.horizontalInfo,
-                                 ledgeCheckForwardOffset,
+                                 freeHangLength,
                                  groundLayer);
 
             ledgeInfo.freeHang = !Physics.Raycast(YOffsetPosition(freeHangUpOffset),
                                                     model.forward,
                                                     freeHangLength);
 
+            Vector3 sideCheckPosition = horizontalCheckPostion;
+            sideCheckPosition.y -= 0.1f;
+
             ledgeInfo.right = Physics.Raycast(
-                horizontalCheckPostion + model.transform.right * ledgeCheckSideSpread,
+                sideCheckPosition + model.transform.right * ledgeCheckSideSpread,
                 model.forward,
-                out var rightInfo,
-                ledgeCheckForwardOffset,
+                out ledgeInfo.rightInfo,
+                freeHangLength + 0.5f,
                 groundLayer);
 
             ledgeInfo.left = Physics.Raycast(
-                horizontalCheckPostion - model.transform.right * ledgeCheckSideSpread,
+                sideCheckPosition - model.transform.right * ledgeCheckSideSpread,
                 model.forward,
-                out var leftInfo,
-                ledgeCheckForwardOffset,
+                out ledgeInfo.leftInfo,
+                freeHangLength + 0.5f,
                 groundLayer);
 
             return b;
