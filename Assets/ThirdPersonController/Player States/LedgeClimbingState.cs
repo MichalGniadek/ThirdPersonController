@@ -62,23 +62,52 @@ namespace ThirdPersonController
             movement.CheckLedge(out ledgeInfo);
             HandleRotationAndPosition(immediate: false);
 
-            if ((movement.inputDirection.z > 0 && ledgeInfo.right) ||
-               (movement.inputDirection.z < 0 && ledgeInfo.left))
+            if (movement.inputDirection.z == 0)
             {
-                movement.transform.Translate(wallDirection * moveSpeed *
-                    movement.inputDirection.z * Time.deltaTime);
-
                 movement.animator.SetFloat("Ledge Climb Direction",
-                                       movement.inputDirection.z,
-                                       0.1f,
-                                       Time.deltaTime);
+                                                        0, 0.1f, Time.deltaTime);
             }
             else
             {
-                movement.animator.SetFloat("Ledge Climb Direction",
-                                       0,
-                                       0.1f,
-                                       Time.deltaTime);
+                float direction = Mathf.Sign(movement.inputDirection.z);
+                var sideInfo = direction > 0 ? ledgeInfo.right : ledgeInfo.left;
+
+                // Inner corner
+                if (sideInfo.sidewaysHit)
+                {
+                    movement.model.Rotate(0f, direction * 90f, 0f);
+                }
+                else
+                {
+                    // Standard move
+                    if (sideInfo.forwardHit)
+                    {
+                        movement.transform.Translate(direction * wallDirection
+                                                     * moveSpeed
+                                                     * Time.deltaTime);
+
+                        movement.animator.SetFloat("Ledge Climb Direction",
+                                                    direction, 0.1f, Time.deltaTime);
+                    }
+                    else
+                    {
+                        // Outer corner
+                        if (sideInfo.cornerHit)
+                        {
+                            movement.transform.RotateAround(
+                                movement.transform.position + movement.model.forward * 2,
+                                Vector3.up, -direction * 90f);
+                            movement.model.Rotate(0f, -direction * 90f, 0f);
+                        }
+                        // No more ledge
+                        else
+                        {
+                            movement.animator.SetFloat("Ledge Climb Direction",
+                                                        0, 0.1f, Time.deltaTime);
+                        }
+                    }
+
+                }
             }
 
             movement.animator.SetFloat("Ledge Climb Is Hang",

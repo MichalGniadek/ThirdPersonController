@@ -226,24 +226,33 @@ namespace ThirdPersonController
         {
             public RaycastHit verticalInfo;
             public RaycastHit horizontalInfo;
-            public RaycastHit rightInfo;
-            public RaycastHit leftInfo;
             public bool freeHang;
-            public bool right;
-            public bool left;
+
+            public struct SideRayInfo
+            {
+                public bool sidewaysHit;
+                public RaycastHit sidewaysInfo;
+                public bool forwardHit;
+                public RaycastHit forwardInfo;
+                public bool cornerHit;
+                public RaycastHit cornerInfo;
+            }
+
+            public SideRayInfo right;
+            public SideRayInfo left;
 
             public Vector3 GetAverageNormal()
             {
                 Vector3 average = horizontalInfo.normal;
                 int i = 0;
-                if (right)
+                if (right.sidewaysHit || right.forwardHit)
                 {
-                    average += rightInfo.normal;
+                    average += right.forwardInfo.normal;
                     i++;
                 }
-                if (left)
+                if (left.sidewaysHit || left.forwardHit)
                 {
-                    average += leftInfo.normal;
+                    average += left.forwardInfo.normal;
                     i++;
                 }
                 return average / i;
@@ -252,15 +261,15 @@ namespace ThirdPersonController
 
         public bool CheckLedge(out LedgeInfo ledgeInfo)
         {
-            Vector3 ledgeCheckPosition =
+            Vector3 verticalCheckPosition =
                     YOffsetPosition(ledgeCheckUpOffset) +
                     model.forward * ledgeCheckForwardOffset;
 
-            bool b = Physics.Raycast(ledgeCheckPosition,
-                                        Vector3.down,
-                                        out ledgeInfo.verticalInfo,
-                                        ledgeCheckLength,
-                                        groundLayer);
+            bool b = Physics.Raycast(verticalCheckPosition,
+                                     Vector3.down,
+                                     out ledgeInfo.verticalInfo,
+                                     ledgeCheckLength,
+                                     groundLayer);
 
             Vector3 horizontalCheckPostion = transform.position;
             horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y - 0.1f;
@@ -272,27 +281,53 @@ namespace ThirdPersonController
                                  groundLayer);
 
             ledgeInfo.freeHang = !Physics.Raycast(YOffsetPosition(freeHangUpOffset),
-                                                    model.forward,
-                                                    freeHangLength);
+                                                  model.forward,
+                                                  freeHangLength);
 
-            Vector3 sideCheckPosition = horizontalCheckPostion;
-            sideCheckPosition.y -= 0.1f;
-
-            ledgeInfo.right = Physics.Raycast(
-                sideCheckPosition + model.transform.right * ledgeCheckSideSpread,
-                model.forward,
-                out ledgeInfo.rightInfo,
-                freeHangLength + 0.5f,
-                groundLayer);
-
-            ledgeInfo.left = Physics.Raycast(
-                sideCheckPosition - model.transform.right * ledgeCheckSideSpread,
-                model.forward,
-                out ledgeInfo.leftInfo,
-                freeHangLength + 0.5f,
-                groundLayer);
+            ledgeInfo.right = RaycastSide(model.right);
+            ledgeInfo.left = RaycastSide(-model.right);
 
             return b;
+
+            LedgeInfo.SideRayInfo RaycastSide(Vector3 sideDirection)
+            {
+                var info = new LedgeInfo.SideRayInfo();
+
+                Vector3 checkPosition = horizontalCheckPostion;
+                checkPosition.y -= 0.1f;
+
+                info.sidewaysHit = Physics.Raycast(checkPosition,
+                                                   sideDirection,
+                                                   out info.sidewaysInfo,
+                                                   ledgeCheckSideSpread,
+                                                   groundLayer);
+
+                if (info.sidewaysHit) return info;
+
+                Vector3 forwardCheckPosition = checkPosition +
+                                                sideDirection * ledgeCheckSideSpread;
+
+                info.forwardHit = Physics.Raycast(forwardCheckPosition,
+                                                  model.forward,
+                                                  out info.forwardInfo,
+                                                  freeHangLength + 0.5f,
+                                                  groundLayer);
+
+                if (info.forwardHit) return info;
+
+                Vector3 cornerCheckPosition =
+                                    forwardCheckPosition
+                                    + sideDirection * (1.2f * ledgeCheckSideSpread)
+                                    + model.forward * (2 * ledgeCheckSideSpread);
+
+                info.cornerHit = Physics.Raycast(cornerCheckPosition,
+                                                 -sideDirection,
+                                                 out info.cornerInfo,
+                                                 freeHangLength + 0.5f,
+                                                 groundLayer);
+
+                return info;
+            }
         }
 
         void OnTriggerEnter(Collider other)
