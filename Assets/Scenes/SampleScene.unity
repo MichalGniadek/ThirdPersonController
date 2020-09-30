@@ -174,20 +174,20 @@ MonoBehaviour:
   collider: {fileID: 331020527}
   camera: {fileID: 963194227}
   model: {fileID: 893093370}
-  groundLayer:
+  collisionLayer:
     serializedVersion: 2
     m_Bits: 256
   groundCheckLength: 0.56
   standCheckLength: 5.1
-  checkSpread: 0.74
+  colliderRadius: 0.74
   wallCheckLength: 2
-  wallCheckYOffset: 3.5
+  wallCheckUpOffset: 3.5
   ledgeCheckForwardOffset: 1.5
   ledgeCheckUpOffset: 6
-  ledgeCheckLength: 2
-  freeHangUpOffset: 2
-  freeHangLength: 1.5
+  verticalLedgeCheckLength: 2
+  horizontalLedgeCheckLength: 1.5
   ledgeCheckSideSpread: 1.35
+  freeHangUpOffset: 2
   walkingState:
     stateEvents:
       onEnter:
@@ -10500,8 +10500,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2066039573}
-  m_LocalRotation: {x: 0.046224914, y: -0.0000000023995437, z: 0.0000000055245506,
-    w: 0.9989311}
+  m_LocalRotation: {x: 0.046224914, y: 0.000000001897454, z: 0.0000000053257097, w: 0.9989311}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:

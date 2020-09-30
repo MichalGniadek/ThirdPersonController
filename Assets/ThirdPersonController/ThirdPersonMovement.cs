@@ -11,30 +11,32 @@ namespace ThirdPersonController
         public new Camera camera = null;
         public Transform model = null;
 
-        [Space]
-        [SerializeField] LayerMask groundLayer = new LayerMask();
-        [SerializeField] float groundCheckLength = 0f;
+        [SerializeField, Tooltip("Layer mask of all objects player should collide with")]
+        LayerMask collisionLayer = new LayerMask();
 
-        [Space]
-        [SerializeField] float standCheckLength = 0f;
+        [SerializeField, Tooltip("Length of a raycast that checks if player is standing on ground")]
+        float groundCheckLength = 0f;
 
-        [Space]
-        [SerializeField] float checkSpread = 0f;
+        [SerializeField, Tooltip("Length of raycast that checks if player can stop crouching")]
+        float standCheckLength = 0f;
+
+        [SerializeField] float colliderRadius = 0f;
         [SerializeField, HideInInspector]
         private readonly Vector3[] spreadTable =
             {Vector3.zero, Vector3.forward, Vector3.right, Vector3.back, Vector3.left };
 
-        [Space]
+        [Header("Checks for wall running")]
         [SerializeField] float wallCheckLength = 0f;
-        [SerializeField] float wallCheckYOffset = 0f;
+        [SerializeField] float wallCheckUpOffset = 0f;
 
-        [Space]
+        [Header("Vertical check for ledges")]
         [SerializeField] float ledgeCheckForwardOffset = 0f;
         [SerializeField] float ledgeCheckUpOffset = 0f;
-        [SerializeField] float ledgeCheckLength = 0f;
-        [SerializeField] float freeHangUpOffset = 0f;
-        [SerializeField] float freeHangLength = 0f;
+        [SerializeField] float verticalLedgeCheckLength = 0f;
+        [Header("Horizontal checks for ledges")]
+        [SerializeField] float horizontalLedgeCheckLength = 0f;
         [SerializeField] float ledgeCheckSideSpread = 0f;
+        [SerializeField] float freeHangUpOffset = 0f;
 
         #region States
         [Space]
@@ -155,7 +157,7 @@ namespace ThirdPersonController
                         Vector3.down,
                         out hitInfo,
                         groundCheckLength,
-                        groundLayer);
+                        collisionLayer);
             }
 
             return raycastHit;
@@ -172,7 +174,7 @@ namespace ThirdPersonController
                         basePos + spreadTable[i],
                         Vector3.up,
                         standCheckLength,
-                        groundLayer);
+                        collisionLayer);
             }
 
             return canStand;
@@ -180,16 +182,16 @@ namespace ThirdPersonController
 
         public bool IsNearValidWall(out RaycastHit wallHitInfo, bool frontBack = false)
         {
-            Vector3 basePos = YOffsetPosition(wallCheckYOffset);
+            Vector3 basePos = YOffsetPosition(wallCheckUpOffset);
 
             Vector3 raycastDirection;
             if (frontBack) raycastDirection = model.forward;
             else raycastDirection = model.right;
 
             Physics.Raycast(basePos, raycastDirection, out var hitInfo1,
-                wallCheckLength, groundLayer);
+                wallCheckLength, collisionLayer);
             Physics.Raycast(basePos, -raycastDirection, out var hitInfo2,
-                wallCheckLength, groundLayer);
+                wallCheckLength, collisionLayer);
 
             bool right_wall_viable = hitInfo1.collider != null;
             bool left_wall_viable = hitInfo2.collider != null;
@@ -268,8 +270,8 @@ namespace ThirdPersonController
             bool b = Physics.Raycast(verticalCheckPosition,
                                      Vector3.down,
                                      out ledgeInfo.verticalInfo,
-                                     ledgeCheckLength,
-                                     groundLayer);
+                                     verticalLedgeCheckLength,
+                                     collisionLayer);
 
             Vector3 horizontalCheckPostion = transform.position;
             horizontalCheckPostion.y = ledgeInfo.verticalInfo.point.y - 0.1f;
@@ -277,12 +279,12 @@ namespace ThirdPersonController
             b &= Physics.Raycast(horizontalCheckPostion,
                                  model.forward,
                                  out ledgeInfo.horizontalInfo,
-                                 freeHangLength,
-                                 groundLayer);
+                                 horizontalLedgeCheckLength,
+                                 collisionLayer);
 
             ledgeInfo.freeHang = !Physics.Raycast(YOffsetPosition(freeHangUpOffset),
                                                   model.forward,
-                                                  freeHangLength);
+                                                  horizontalLedgeCheckLength);
 
             ledgeInfo.right = RaycastSide(model.right);
             ledgeInfo.left = RaycastSide(-model.right);
@@ -300,7 +302,7 @@ namespace ThirdPersonController
                                                    sideDirection,
                                                    out info.sidewaysInfo,
                                                    ledgeCheckSideSpread,
-                                                   groundLayer);
+                                                   collisionLayer);
 
                 if (info.sidewaysHit) return info;
 
@@ -310,8 +312,8 @@ namespace ThirdPersonController
                 info.forwardHit = Physics.Raycast(forwardCheckPosition,
                                                   model.forward,
                                                   out info.forwardInfo,
-                                                  freeHangLength + 0.5f,
-                                                  groundLayer);
+                                                  horizontalLedgeCheckLength + 0.5f,
+                                                  collisionLayer);
 
                 if (info.forwardHit) return info;
 
@@ -323,8 +325,8 @@ namespace ThirdPersonController
                 info.cornerHit = Physics.Raycast(cornerCheckPosition,
                                                  -sideDirection,
                                                  out info.cornerInfo,
-                                                 freeHangLength + 0.5f,
-                                                 groundLayer);
+                                                 horizontalLedgeCheckLength + 0.5f,
+                                                 collisionLayer);
 
                 return info;
             }
@@ -362,7 +364,7 @@ namespace ThirdPersonController
                     Vector3.up * standCheckLength);
             }
 
-            Vector3 wallCheckBasePos = YOffsetPosition(wallCheckYOffset);
+            Vector3 wallCheckBasePos = YOffsetPosition(wallCheckUpOffset);
             Gizmos.DrawRay(wallCheckBasePos, model.right * wallCheckLength);
             Gizmos.DrawRay(wallCheckBasePos, -model.right * wallCheckLength);
 
@@ -371,18 +373,18 @@ namespace ThirdPersonController
                 YOffsetPosition(ledgeCheckUpOffset) +
                 model.forward * ledgeCheckForwardOffset;
 
-            Gizmos.DrawRay(ledgeCheckPosition, Vector3.down * ledgeCheckLength);
+            Gizmos.DrawRay(ledgeCheckPosition, Vector3.down * verticalLedgeCheckLength);
             Gizmos.DrawRay(YOffsetPosition(freeHangUpOffset),
-                model.forward * freeHangLength);
+                model.forward * horizontalLedgeCheckLength);
         }
 
         void OnValidate()
         {
             spreadTable[0] = Vector3.zero;
-            spreadTable[1] = Vector3.forward * checkSpread;
-            spreadTable[2] = Vector3.right * checkSpread;
-            spreadTable[3] = Vector3.back * checkSpread;
-            spreadTable[4] = Vector3.left * checkSpread;
+            spreadTable[1] = Vector3.forward * colliderRadius;
+            spreadTable[2] = Vector3.right * colliderRadius;
+            spreadTable[3] = Vector3.back * colliderRadius;
+            spreadTable[4] = Vector3.left * colliderRadius;
         }
     }
 }

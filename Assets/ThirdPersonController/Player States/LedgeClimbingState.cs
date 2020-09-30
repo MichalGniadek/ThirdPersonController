@@ -6,10 +6,13 @@ namespace ThirdPersonController
     [System.Serializable]
     public class LedgeClimbingState : PlayerState
     {
-        [SerializeField] Vector2 bracedGrabOffset = new Vector2();
-        [SerializeField] Vector2 hangGrabOffset = new Vector2();
+        [SerializeField, Tooltip("Use this to correct position during \"braced\" animation")]
+        Vector2 bracedGrabOffset = new Vector2();
+        [SerializeField, Tooltip("Use this to correct position during \"hang\" animation")]
+        Vector2 hangGrabOffset = new Vector2();
 
-        [SerializeField] float moveSpeed = 0f;
+        [SerializeField, Tooltip("Move speed during moving left/ right when on a ledge")]
+        float moveSpeed = 0f;
         [SerializeField] float jumpForce = 0f;
 
         ThirdPersonMovement.LedgeInfo ledgeInfo;
