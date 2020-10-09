@@ -17,19 +17,19 @@ namespace ThirdPersonController
         float currentTime = 0f;
         Vector3 dashDirection;
 
-        public override PlayerState Process(Vector3 inputWorldDirection)
+        public override PlayerState Process(Vector3 velocityRelativeToCamera)
         {
             currentTime -= Time.deltaTime;
             if (currentTime <= 0)
             {
                 movement.rigidbody.AddForce(downForce * Vector3.down, ForceMode.Impulse);
-                if (movement.OnGround()) return movement.walkingState;
+                if (movement.OnGround(out var hit)) return movement.walkingState;
                 else return movement.inAirState;
             }
             return this;
         }
 
-        public override void FixedProcess(Vector3 inputWorldDirection)
+        public override void FixedProcess(Vector3 velocityRelativeToCamera)
         {
             movement.rigidbody.AddForce(dashDirection * sustainedForce);
         }
@@ -37,7 +37,7 @@ namespace ThirdPersonController
         protected override void EnterImpl()
         {
             currentTime = duration;
-            dashDirection = movement.rigidbody.velocity.Horizontal().normalized;
+            dashDirection = movement.CameraForward.Horizontal().normalized;
             movement.rigidbody.AddForce(dashDirection * impulseForce, ForceMode.Impulse);
         }
 
