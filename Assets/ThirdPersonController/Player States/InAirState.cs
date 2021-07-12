@@ -34,6 +34,8 @@ namespace ThirdPersonController
 
             if (Input.GetKeyDown(KeyCode.E)) return movement.dashState;
 
+            if (Input.GetMouseButtonDown(0)) return movement.swingingState;
+
             if (movement.CouldReturnToState(movement.ledgeCimbingState)
                 && movement.CheckLedge(out var ledge)
                 && Input.GetKey(KeyCode.LeftShift))

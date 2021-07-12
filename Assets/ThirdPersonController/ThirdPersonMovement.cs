@@ -48,6 +48,7 @@ namespace ThirdPersonController
         public WallRunningState wallRunningState = new WallRunningState();
         public LadderClimbingState ladderClimbingState = new LadderClimbingState();
         public LedgeClimbingState ledgeCimbingState = new LedgeClimbingState();
+        public SwingingState swingingState = new SwingingState();
         #endregion
 
         float timeSinceStateChange = 0f;
@@ -82,6 +83,7 @@ namespace ThirdPersonController
             wallRunningState.movement = this;
             ladderClimbingState.movement = this;
             ledgeCimbingState.movement = this;
+            swingingState.movement = this;
 
             currentState = walkingState;
             currentState.Enter();
