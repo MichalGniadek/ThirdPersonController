@@ -288,7 +288,7 @@ MonoBehaviour:
     climbSpeed: 0.1
     verticalJumpForce: 666
     horizontalJumpForce: 1000
-    ladderOffset: 4.2
+    ladderOffset: 5.7
   ledgeCimbingState:
     stateEvents:
       onEnter:
@@ -1777,7 +1777,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh33240
+  m_Name: pb_Mesh14538
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
